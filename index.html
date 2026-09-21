@@ -20,14 +20,14 @@
 <div class="calc">
 <section class="panel input"><div class="title"><b>Исходные данные</b><span>ВВОД</span></div><div class="fields">
 <div class="full"><label>Тип дома</label><div class="types"><div><input id="t" type="radio" name="type" value="T" checked><label for="t">Т · один коридор</label></div><div><input id="n" type="radio" name="type" value="N"><label for="n">Н · два коридора</label></div></div></div>
-<label>Строительная площадь, м²<input id="build" type="number" value="550" min="1"></label>
-<label>Площадь квартир, м²<input id="apt" type="number" value="402" min="1"></label>
-<label>Количество квартир<input id="count" type="number" value="13" min="1"></label>
-<label>Средняя площадь, м²<input id="avg" type="number" value="31" min="1"></label>
+<label>Строительная площадь, м²<input id="build" type="number" value="740" min="1"></label>
+<label>Площадь квартир, м²<input id="apt" type="number" value="535" min="1"></label>
+<label>Количество квартир<input id="count" type="number" value="14" min="1"></label>
+<label>Средняя площадь, м²<input id="avg" type="number" value="38" min="1"></label>
 <label>Типовых этажей<input id="floors" type="number" value="25" min="1"></label>
 <label>Цена реализации, ₽/м²<input id="price" type="number" value="165000" min="0"></label>
 </div><div id="validation" class="note" style="margin-top:10px"></div></section>
-<section class="panel output"><div class="title"><b>Результат</b><span>КЭП</span></div><div id="kep" class="kep">0,731</div><div id="badge" class="badge">—</div><div class="rows"><div class="row"><span>Эффективный диапазон</span><b id="range">—</b></div><div class="row"><span>Целевой КЭП</span><b id="target">—</b></div><div class="row"><span>Δ до цели</span><b id="delta">—</b></div></div><div class="metrics"><div class="metric"><small>Резерв / этаж</small><strong id="rf">—</strong></div><div class="metric"><small>Резерв / дом</small><strong id="rt">—</strong></div><div class="metric money"><small>Экономический потенциал</small><strong id="effect">—</strong></div></div>
+<section class="panel output"><div class="title"><b>Результат</b><span>КЭП</span></div><div id="kep" class="kep">0,723</div><div id="badge" class="badge">—</div><div class="rows"><div class="row"><span>Эффективный диапазон</span><b id="range">—</b></div><div class="row"><span>Целевой КЭП</span><b id="target">—</b></div><div class="row"><span>Δ до цели</span><b id="delta">—</b></div></div><div class="metrics"><div class="metric"><small>Резерв / этаж</small><strong id="rf">—</strong></div><div class="metric"><small>Резерв / дом</small><strong id="rt">—</strong></div><div class="metric money"><small>Экономический потенциал</small><strong id="effect">—</strong></div></div>
 <div class="save"><b>Сохранить результат в базу</b><div class="two" style="margin-top:8px"><label>Наименование ЖК *<input id="complex" placeholder="необязательно"></label><label>Регион<input id="region" placeholder="Например, Новосибирская область"></label></div><div class="note" style="color:#aebbb5;margin-top:5px">* необязательно к заполнению</div><button id="saveBtn" class="btn primary" type="button">Сохранить результат</button><div id="saveStatus" class="status"></div></div>
 </section></div></main>
 </div></div>
