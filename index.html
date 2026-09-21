@@ -86,5 +86,5 @@ $('chatForm').onsubmit=async e=>{e.preventDefault();const t=$('chatText').value.
 $('saveBtn').onclick=async()=>{if(!last||!sb||!user)return stat('База пока не подключена.',true);stat('Сохраняем…');const r=last,{error}=await sb.from('calculations').insert({user_id:user.id,house_type:r.type,building_area:r.b,apartment_area:r.a,apartment_count:r.c,avg_apartment_area:r.av,typical_floors:r.f,sale_price:r.p,kep:r.k,status:r.label,target_kep:r.target,range_low:r.lo,range_high:r.hi,delta_kep:r.d,reserve_floor:r.rf,reserve_total:r.rt,realization_coeff:r.kr,economic_effect:r.e,complex_name:$('complex').value.trim()||null,region:$('region').value.trim()||null});if(error)return stat('Не удалось сохранить расчет.',true);stat('Расчет сохранен в базе ПРОЕКТСЕТИ.');loadStats()};
 init();
 </script>
-<script type="module" src="./meta_core.js?v=2"></script>
+<script type="module" src="./meta_core.js?v=3"></script>
 </body></html>
