@@ -77,6 +77,63 @@ function addLine(parent, text, strongPrefix = '') {
   parent.appendChild(line);
 }
 
+function ensureInfoModal() {
+  if (document.getElementById('fieldInfoModal')) return;
+  const back = document.createElement('div');
+  back.id = 'fieldInfoModal';
+  back.className = 'modalBack';
+  back.innerHTML = '<div class="modal infoModal"><div class="modalTop"><div><h3 id="fieldInfoTitle">Пояснение</h3></div><button type="button" class="close">×</button></div><div id="fieldInfoText" class="infoModalText"></div></div>';
+  document.body.appendChild(back);
+  const close = () => back.classList.remove('open');
+  back.querySelector('.close').addEventListener('click', close);
+  back.addEventListener('click', e => { if (e.target === back) close(); });
+}
+
+function addInfoButtonToLabel(inputId, title, text) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const label = input.closest('label');
+  if (!label || label.parentElement?.classList.contains('fieldWithInfo')) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fieldWithInfo';
+  label.parentNode.insertBefore(wrap, label);
+  wrap.appendChild(label);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'infoBtn';
+  btn.textContent = 'i';
+  btn.setAttribute('aria-label', 'Пояснение: ' + title);
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('fieldInfoTitle').textContent = title;
+    document.getElementById('fieldInfoText').textContent = text;
+    document.getElementById('fieldInfoModal').classList.add('open');
+  });
+  wrap.appendChild(btn);
+}
+
+function addTypeInfoButton() {
+  const full = document.querySelector('.fields .full');
+  if (!full || full.querySelector('.infoBtn')) return;
+  full.classList.add('typeWithInfo');
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'infoBtn';
+  btn.textContent = 'i';
+  btn.setAttribute('aria-label', 'Пояснение: тип дома');
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('fieldInfoTitle').textContent = 'Тип дома';
+    document.getElementById('fieldInfoText').textContent = 'Т — схема с одним коридором. Н — схема с двумя коридорами. Тип влияет на рабочий диапазон КЭП, целевой КЭП, допустимую квартирность и калибровку по массиву МЕТА.';
+    document.getElementById('fieldInfoModal').classList.add('open');
+  });
+  full.appendChild(btn);
+}
+
 function ensureUi() {
   const build = $('build');
   if (build?.closest('label')) {
@@ -139,7 +196,7 @@ function ensureUi() {
   if (!document.getElementById('metaCoreStyle')) {
     const style = document.createElement('style');
     style.id = 'metaCoreStyle';
-    style.textContent = '.analysisBox{margin-top:12px;padding:13px;border-radius:10px;background:#f5f6f3;color:#28322d;border:1px solid #d5dad5;line-height:1.5}.analysisBox b{color:#24302a}.analysisBox .metaHead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:7px}.analysisBox .metaTag{display:inline-block;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:900;background:#e2e9e4;color:#315b49}.analysisBox .metaTag.warn{background:#f0e4bc;color:#6a5a27}.analysisBox .metaTag.bad{background:#efd8d5;color:#7c413b}.analysisBox .scenario{margin-top:8px;padding-top:8px;border-top:1px solid #d9ddd8}';
+    style.textContent = '.fieldWithInfo{position:relative;min-width:0}.fieldWithInfo>label{display:block}.fieldWithInfo>.infoBtn,.typeWithInfo>.infoBtn{position:absolute;top:-1px;right:0}.typeWithInfo{position:relative}.infoBtn{width:22px;height:22px;min-width:22px;border-radius:50%;border:1px solid #6f9b87;background:#4d806d;color:#fff;font-size:12px;font-weight:900;line-height:20px;padding:0;cursor:pointer;box-shadow:0 0 0 2px rgba(77,128,109,.10),0 0 10px rgba(77,128,109,.28)}.infoBtn:hover{background:#356b58;box-shadow:0 0 0 3px rgba(77,128,109,.14),0 0 14px rgba(77,128,109,.42)}.infoModal{width:min(560px,100%)}.infoModalText{margin-top:14px;line-height:1.6;font-size:14px;color:#343d38;white-space:pre-line}.analysisBox{margin-top:12px;padding:13px;border-radius:10px;background:#f5f6f3;color:#28322d;border:1px solid #d5dad5;line-height:1.5}.analysisBox b{color:#24302a}.analysisBox .metaHead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:7px}.analysisBox .metaTag{display:inline-block;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:900;background:#e2e9e4;color:#315b49}.analysisBox .metaTag.warn{background:#f0e4bc;color:#6a5a27}.analysisBox .metaTag.bad{background:#efd8d5;color:#7c413b}.analysisBox .scenario{margin-top:8px;padding-top:8px;border-top:1px solid #d9ddd8}';
     document.head.appendChild(style);
   }
 }
@@ -346,5 +403,15 @@ for (const id of watched) $(id)?.addEventListener('input', calculate);
 document.querySelectorAll('input[name=type]').forEach(el => el.addEventListener('change', calculate));
 
 if ($('saveBtn')) $('saveBtn').onclick = saveMetaResult;
+
+ensureInfoModal();
+addTypeInfoButton();
+addInfoButtonToLabel('build', 'Площадь этажа для расчета КЭП', 'Площадь типового этажа по наружной грани строительных ограждающих конструкций, за вычетом площадей лифтовых шахт и балконов. Это знаменатель формулы КЭП.');
+addInfoButtonToLabel('apt', 'Площадь квартир', 'Суммарная площадь квартир типового этажа с учетом лоджий. Это числитель формулы КЭП.');
+addInfoButtonToLabel('count', 'Количество квартир', 'Количество квартир на типовом этаже. Используется вместе с площадью квартир для расчета фактической средней площади и для проверки допустимой квартирности по ядру МЕТА.');
+addInfoButtonToLabel('avg', 'Средняя площадь квартиры', 'Контрольный показатель квартирографии. Ядро дополнительно считает Sср = площадь квартир / количество квартир и сравнивает с введенным значением. Расхождение более 5% помечается как ошибка исходных данных.');
+addInfoButtonToLabel('floors', 'Количество типовых этажей', 'Используется для перевода эффекта одного типового этажа в эффект по дому: резерв площади, дополнительная выручка и возможное снижение СМР.');
+addInfoButtonToLabel('price', 'Цена реализации', 'Цена продажи 1 м². Используется для оценки верхней границы дополнительной выручки от потенциального роста продаваемой площади.');
+addInfoButtonToLabel('smr', 'СМР', 'Стоимость строительно-монтажных работ на 1 м². Используется в альтернативном сценарии: оценка экономии при сокращении строительной площади без уменьшения площади квартир.');
 
 calculate();
