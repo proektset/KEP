@@ -128,7 +128,7 @@ function addTypeInfoButton() {
     e.preventDefault();
     e.stopPropagation();
     document.getElementById('fieldInfoTitle').textContent = 'Тип дома';
-    document.getElementById('fieldInfoText').textContent = 'Т — схема с одним коридором. Н — схема с двумя коридорами. Тип влияет на рабочий диапазон КЭП, целевой КЭП, допустимую квартирность и калибровку по массиву МЕТА.';
+    document.getElementById('fieldInfoText').textContent = 'Т — схема с одним коридором. Н — схема с двумя коридорами. Тип влияет на рабочий диапазон КЭП, целевой КЭП, допустимую квартирность и калибровку по расчётному массиву.';
     document.getElementById('fieldInfoModal').classList.add('open');
   });
   full.appendChild(btn);
@@ -272,7 +272,7 @@ function calculate() {
       reasons.push('для класса ' + cls.rule.name + ' в загруженном ядре нет подтвержденного массива кандидатов');
     }
   } else {
-    reasons.push('Sср ' + fmt(avgCalc, 1) + ' м² вне профилей, на которых откалибровано ядро МЕТА');
+    reasons.push('Sср ' + fmt(avgCalc, 1) + ' м² вне профилей, на которых откалибровано расчётная модель');
     const confirmedRanges = Object.values(META.classes).filter(x => x.status === 'confirmed').map(x => x.units[type]);
     const minUnits = Math.min(...confirmedRanges.map(x => x[0]));
     const maxUnits = Math.max(...confirmedRanges.map(x => x[1]));
@@ -302,13 +302,13 @@ function calculate() {
   box.textContent = '';
   const head = document.createElement('div');
   head.className = 'metaHead';
-  addTag(head, mathConfirmed ? 'МЕТА: ЦЕЛЬ МАТЕМАТИЧЕСКИ ПОДТВЕРЖДАЕТСЯ' : 'ТЕОРЕТИЧЕСКИЙ ПОТЕНЦИАЛ', mathConfirmed ? '' : 'bad');
+  addTag(head, mathConfirmed ? 'ЦЕЛЬ МАТЕМАТИЧЕСКИ ПОДТВЕРЖДАЕТСЯ' : 'ТЕОРЕТИЧЕСКИЙ ПОТЕНЦИАЛ', mathConfirmed ? '' : 'bad');
   if (cls) addTag(head, cls.rule.name, cls.calibrated ? '' : 'warn');
   box.appendChild(head);
 
   const calib = document.createElement('div');
   const cb = document.createElement('b');
-  cb.textContent = 'Калибровка МЕТА: ';
+  cb.textContent = 'Математическая калибровка: ';
   calib.append(cb, document.createTextNode(calibrationText + ' Основа — математический массив 67 468 вариантов; геометрия конкретного этажа этим расчетом не подтверждается.'));
   box.appendChild(calib);
 
@@ -332,7 +332,7 @@ function calculate() {
   addLine(
     box,
     mathConfirmed
-      ? ' Цель подтверждается математическим массивом МЕТА для этой комбинации. Геометрия и квартирография конкретного этажа требуют отдельной проверки.'
+      ? ' Цель подтверждается математическим расчётным массивом для этой комбинации. Геометрия и квартирография конкретного этажа требуют отдельной проверки.'
       : ' Это теоретическая верхняя граница. Реализуемость требует проверки квартирографии и геометрии этажа.',
     'Реализуемость.'
   );
@@ -389,7 +389,7 @@ async function saveMetaResult() {
       region: $('region')?.value.trim() || null
     });
     if (error) throw error;
-    show(state.mathConfirmed ? 'Расчет сохранен. Потенциал подтвержден математической калибровкой МЕТА.' : 'Расчет сохранен как теоретический; неподтвержденный эффект не включен в общую статистику.');
+    show(state.mathConfirmed ? 'Расчет сохранен. Потенциал подтвержден математической калибровкой расчётная модель.' : 'Расчет сохранен как теоретический; неподтвержденный эффект не включен в общую статистику.');
   } catch (e) {
     console.error(e);
     show('Не удалось сохранить расчет: ' + (e?.message || 'ошибка'), true);
@@ -408,7 +408,7 @@ ensureInfoModal();
 addTypeInfoButton();
 addInfoButtonToLabel('build', 'Площадь этажа для расчета КЭП', 'Площадь типового этажа по наружной грани строительных ограждающих конструкций, за вычетом площадей лифтовых шахт и балконов. Это знаменатель формулы КЭП.');
 addInfoButtonToLabel('apt', 'Площадь квартир', 'Суммарная площадь квартир типового этажа с учетом лоджий. Это числитель формулы КЭП.');
-addInfoButtonToLabel('count', 'Количество квартир', 'Количество квартир на типовом этаже. Используется вместе с площадью квартир для расчета фактической средней площади и для проверки допустимой квартирности по ядру МЕТА.');
+addInfoButtonToLabel('count', 'Количество квартир', 'Количество квартир на типовом этаже. Используется вместе с площадью квартир для расчета фактической средней площади и для проверки допустимой квартирности по расчётной модели.');
 addInfoButtonToLabel('avg', 'Средняя площадь квартиры', 'Контрольный показатель квартирографии. Ядро дополнительно считает Sср = площадь квартир / количество квартир и сравнивает с введенным значением. Расхождение более 5% помечается как ошибка исходных данных.');
 addInfoButtonToLabel('floors', 'Количество типовых этажей', 'Используется для перевода эффекта одного типового этажа в эффект по дому: резерв площади, дополнительная выручка и возможное снижение СМР.');
 addInfoButtonToLabel('price', 'Цена реализации', 'Цена продажи 1 м². Используется для оценки верхней границы дополнительной выручки от потенциального роста продаваемой площади.');
