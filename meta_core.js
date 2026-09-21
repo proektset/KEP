@@ -170,7 +170,7 @@ function ensureUi() {
     const row = document.createElement('div');
     row.className = 'row';
     const span = document.createElement('span');
-    span.textContent = 'До целевого минимума';
+    span.textContent = 'До нижней рабочей границы';
     const b = document.createElement('b');
     b.id = 'workGap';
     row.append(span, b);
@@ -179,11 +179,11 @@ function ensureUi() {
   }
 
   const rf = $('rf');
-  if (rf?.parentElement?.querySelector('small')) rf.parentElement.querySelector('small').textContent = 'Резерв до минимума / этаж';
+  if (rf?.parentElement?.querySelector('small')) rf.parentElement.querySelector('small').textContent = 'Теоретический разрыв / этаж';
   const rt = $('rt');
-  if (rt?.parentElement?.querySelector('small')) rt.parentElement.querySelector('small').textContent = 'Резерв до минимума / дом';
+  if (rt?.parentElement?.querySelector('small')) rt.parentElement.querySelector('small').textContent = 'Теоретический разрыв / дом';
   const effect = $('effect');
-  if (effect?.parentElement?.querySelector('small')) effect.parentElement.querySelector('small').textContent = 'Потенциал до минимума';
+  if (effect?.parentElement?.querySelector('small')) effect.parentElement.querySelector('small').textContent = 'Потенциал выручки до цели';
 
   const metrics = document.querySelector('.output .metrics');
   if (metrics && !document.getElementById('metaBox')) {
@@ -227,224 +227,121 @@ function calculate() {
 
   const kep = a / b;
   const avgCalc = a / c;
-  const minKep = platform.working[0];
-  const maxKep = platform.working[1];
+  const workingMin = platform.working[0];
   const target = platform.target;
-
-  const belowMin = kep < minKep;
-  const aboveMax = kep > maxKep;
-  const inTargetZone = !belowMin && !aboveMax;
-
-  // Base reserve is counted ONLY up to the minimum of the target range.
-  const minSellArea = minKep * b;
-  const reserveFloor = belowMin ? Math.max(0, minSellArea - a) : 0;
-  const minBuildArea = a / minKep;
-  const buildReductionToMin = belowMin ? Math.max(0, b - minBuildArea) : 0;
-  const reserveHouse = reserveFloor * floors;
-  const revenuePotential = reserveHouse * price;
-  const costPotential = buildReductionToMin * floors * smr;
-
-  // Higher reference target is not treated as mandatory or as automatic profit.
+  const entrySell = Math.max(0, workingMin * b - a);
+  const entryBuild = a / workingMin;
   const targetSellArea = target * b;
   const targetSell = Math.max(0, targetSellArea - a);
   const targetAvg = targetSellArea / c;
   const targetBuild = a / target;
+  const targetBuildDelta = Math.max(0, b - targetBuild);
+  const reserveHouse = targetSell * floors;
+  const revenuePotential = reserveHouse * price;
+  const costPotential = targetBuildDelta * floors * smr;
 
-  let level;
-  let badgeBg;
-  if (belowMin) {
-    level = 'НИЖЕ ЦЕЛЕВОГО МИНИМУМА';
-    badgeBg = 'var(--bad)';
-  } else if (inTargetZone) {
-    level = 'ЦЕЛЕВОЙ ДИАПАЗОН';
-    badgeBg = 'var(--good)';
-  } else {
-    level = 'ВЫШЕ ЦЕЛЕВОГО ДИАПАЗОНА — ПРОВЕРИТЬ БАЛАНС';
-    badgeBg = 'var(--warn)';
-  }
+  let level = 'НИЗКИЙ';
+  let badgeBg = 'var(--bad)';
+  if (kep >= workingMin && kep < target - 0.003) { level = 'РАБОЧИЙ'; badgeBg = 'var(--good)'; }
+  else if (kep >= target - 0.003 && kep <= platform.working[1] + 0.004) { level = 'ЦЕЛЕВОЙ'; badgeBg = 'var(--good)'; }
+  else if (kep >= workingMin - 0.015 && kep < workingMin) { level = 'НИЖЕ РАБОЧЕГО'; badgeBg = 'var(--warn)'; }
+  else if (kep > platform.working[1] + 0.004) { level = 'ВЫСОКИЙ — ПРОВЕРИТЬ БАЛАНС'; badgeBg = 'var(--warn)'; }
 
   const cls = inferClass(avgCalc);
   const reasons = [];
   let envelope = null;
-  let currentConfirmed = false;
-  let targetCompatible = false;
-  let calibrationText = 'Подтвержденная расчетная комбинация для текущих параметров не найдена.';
+  let mathConfirmed = false;
+  let calibrationText = 'Подтвержденная калибровка для этой комбинации не найдена.';
 
   if (cls) {
     const units = cls.rule.units[type];
     const countOk = between(c, units);
-
-    if (!countOk) {
-      reasons.push('квартирность ' + c + ' вне диапазона ' + units[0] + '–' + units[1] + ' для ' + cls.rule.name + ' / ' + platform.label);
-    }
-    if (!cls.calibrated) {
-      reasons.push('Sср ' + fmt(avgCalc, 1) + ' м² вне подтвержденного диапазона ' + fmt(cls.rule.allowed[0], 1) + '–' + fmt(cls.rule.allowed[1], 1) + ' м²');
-    }
+    if (!countOk) reasons.push('квартирность ' + c + ' вне диапазона ' + units[0] + '–' + units[1] + ' для ' + cls.rule.name + ' / ' + platform.label);
+    if (!cls.calibrated) reasons.push('Sср ' + fmt(avgCalc, 1) + ' м² вне подтвержденного диапазона ' + fmt(cls.rule.allowed[0], 1) + '–' + fmt(cls.rule.allowed[1], 1) + ' м²');
 
     if (cls.calibrated && countOk && META.envelopes[cls.id]?.[type]?.[c]) {
       envelope = META.envelopes[cls.id][type][c];
-      currentConfirmed =
-        between(avgCalc, envelope.avg) &&
-        between(a, envelope.sell) &&
-        between(kep, envelope.kep);
-
-      targetCompatible =
-        between(target, envelope.kep) &&
-        between(targetSellArea, envelope.sell) &&
-        between(targetAvg, envelope.avg);
-
-      calibrationText =
-        cls.rule.name + ' / ' + platform.label + ' / ' + c +
-        ' кв.: расчетный диапазон Sср ' + fmt(envelope.avg[0], 1) + '–' + fmt(envelope.avg[1], 1) +
-        ' м²; Sпрод ' + fmt(envelope.sell[0], 1) + '–' + fmt(envelope.sell[1], 1) +
-        ' м²; КЭП ' + fmt(envelope.kep[0], 3) + '–' + fmt(envelope.kep[1], 3) +
-        ' (' + fmt(envelope.n, 0) + ' вариантов).';
-
-      if (!currentConfirmed) {
-        reasons.push('текущая комбинация Sср / Sпрод / КЭП не полностью попадает в расчетный диапазон для данной квартирности');
-      }
+      calibrationText = cls.rule.name + ' / ' + platform.label + ' / ' + c + ' кв.: калиброванный КЭП ' + fmt(envelope.kep[0], 3) + '–' + fmt(envelope.kep[1], 3) + ' (' + fmt(envelope.n, 0) + ' вариантов).';
+      const targetInKep = between(target, envelope.kep);
+      const growthPossible = between(targetSellArea, envelope.sell) && between(targetAvg, envelope.avg) && targetInKep;
+      const reductionPossible = between(a, envelope.sell) && targetInKep;
+      mathConfirmed = growthPossible || reductionPossible;
+      if (!targetInKep) reasons.push('цель ' + fmt(target, 3) + ' вне калиброванного диапазона КЭП для этой квартирности');
+      if (!growthPossible && !reductionPossible && targetInKep) reasons.push('для цели требуется изменить баланс Sпрод / Sср или конфигурацию этажа');
     } else if (cls.rule.status === 'hypothesis') {
-      reasons.push('для класса ' + cls.rule.name + ' пока нет подтвержденного массива вариантов');
+      reasons.push('для класса ' + cls.rule.name + ' в загруженном ядре нет подтвержденного массива кандидатов');
     }
   } else {
-    reasons.push('Sср ' + fmt(avgCalc, 1) + ' м² вне профилей, на которых откалибрована расчетная модель');
+    reasons.push('Sср ' + fmt(avgCalc, 1) + ' м² вне профилей, на которых откалибровано расчётная модель');
+    const confirmedRanges = Object.values(META.classes).filter(x => x.status === 'confirmed').map(x => x.units[type]);
+    const minUnits = Math.min(...confirmedRanges.map(x => x[0]));
+    const maxUnits = Math.max(...confirmedRanges.map(x => x[1]));
+    if (c < minUnits || c > maxUnits) reasons.push('для подтвержденных классов платформы ' + platform.label + ' квартирность находится в диапазоне ' + minUnits + '–' + maxUnits + ', введено ' + c);
   }
 
-  if (!between(a, platform.sell)) {
-    reasons.push('Sпрод ' + fmt(a, 1) + ' м² вне базового диапазона платформы ' + fmt(platform.sell[0], 0) + '–' + fmt(platform.sell[1], 0) + ' м²');
-  }
+  if (!between(a, platform.sell)) reasons.push('Sпрод ' + fmt(a, 1) + ' м² вне базового диапазона платформы ' + fmt(platform.sell[0], 0) + '–' + fmt(platform.sell[1], 0) + ' м²');
 
   const consistency = Math.abs(c * avInput - a) / Math.max(a, 1);
-  if (consistency > 0.05) {
-    reasons.unshift('введенная Sср не согласована с Sквартир / N более чем на 5%');
-  }
+  if (consistency > 0.05) reasons.unshift('введенная Sср не согласована с Sквартир / N более чем на 5%');
 
   $('kep').textContent = fmt(kep, 3);
   $('badge').textContent = level;
   $('badge').style.background = badgeBg;
-  $('range').textContent = fmt(minKep, 3) + ' — ' + fmt(maxKep, 3);
+  $('range').textContent = fmt(platform.working[0], 3) + ' — ' + fmt(platform.working[1], 3);
   $('target').textContent = fmt(target, 3);
-  $('delta').textContent = belowMin ? '+' + fmt(minKep - kep, 3) : '0,000';
-  $('workGap').textContent = belowMin ? '+' + fmt(reserveFloor, 1) + ' м²/этаж' : 'достигнут';
-  $('rf').textContent = belowMin ? '+' + fmt(reserveFloor, 1) + ' м²' : '—';
-  $('rt').textContent = belowMin ? '+' + fmt(reserveHouse, 0) + ' м²' : '—';
-  $('effect').textContent = belowMin ? rub(revenuePotential) : '—';
-
-  const targetRow = $('target')?.closest('.row');
-  if (targetRow?.querySelector('span')) targetRow.querySelector('span').textContent = 'Ориентир внутри диапазона';
-  const deltaRow = $('delta')?.closest('.row');
-  if (deltaRow?.querySelector('span')) deltaRow.querySelector('span').textContent = 'Δ до целевого минимума';
-  const rangeRow = $('range')?.closest('.row');
-  if (rangeRow?.querySelector('span')) rangeRow.querySelector('span').textContent = 'Целевой диапазон';
+  $('delta').textContent = target > kep ? '+' + fmt(target - kep, 3) : '0,000';
+  $('workGap').textContent = entrySell > 0 ? '+' + fmt(entrySell, 1) + ' м²/этаж' : 'достигнута';
+  $('rf').textContent = targetSell > 0 ? '+' + fmt(targetSell, 1) + ' м²' : '—';
+  $('rt').textContent = targetSell > 0 ? '+' + fmt(reserveHouse, 0) + ' м²' : '—';
+  $('effect').textContent = targetSell > 0 ? rub(revenuePotential) : '—';
 
   if ($('validation')) {
-    $('validation').textContent =
-      'Расчетная Sср = Sквартир / N = ' + fmt(avgCalc, 1) + ' м². ' +
-      (consistency > 0.05
-        ? 'Введено ' + fmt(avInput, 1) + ' м² — данные нужно сверить.'
-        : 'Введенная Sср согласована с расчетной.');
+    $('validation').textContent = 'Расчетная Sср = Sквартир / N = ' + fmt(avgCalc, 1) + ' м². ' + (consistency > 0.05 ? 'Введено ' + fmt(avInput, 1) + ' м² — данные нужно сверить.' : 'Введенная Sср согласована с расчетной.');
   }
 
   box.textContent = '';
   const head = document.createElement('div');
   head.className = 'metaHead';
-  addTag(
-    head,
-    belowMin ? 'КЭП НИЖЕ ЦЕЛЕВОГО МИНИМУМА' :
-    inTargetZone ? 'ЦЕЛЕВОЙ ДИАПАЗОН ДОСТИГНУТ' :
-    'ВЫШЕ ЦЕЛЕВОГО ДИАПАЗОНА',
-    belowMin ? 'bad' : aboveMax ? 'warn' : ''
-  );
-  if (currentConfirmed) addTag(head, 'ТЕКУЩАЯ КОМБИНАЦИЯ ПОДТВЕРЖДЕНА');
+  addTag(head, mathConfirmed ? 'ЦЕЛЬ МАТЕМАТИЧЕСКИ ПОДТВЕРЖДАЕТСЯ' : 'ТЕОРЕТИЧЕСКИЙ ПОТЕНЦИАЛ', mathConfirmed ? '' : 'bad');
   if (cls) addTag(head, cls.rule.name, cls.calibrated ? '' : 'warn');
   box.appendChild(head);
 
   const calib = document.createElement('div');
   const cb = document.createElement('b');
   cb.textContent = 'Математическая калибровка: ';
-  calib.append(
-    cb,
-    document.createTextNode(
-      calibrationText +
-      ' Геометрия конкретного этажа и соответствие Атрибутивной модели этим расчетом не подтверждаются.'
-    )
-  );
+  calib.append(cb, document.createTextNode(calibrationText + ' Основа — математический массив 67 468 вариантов; геометрия конкретного этажа этим расчетом не подтверждается.'));
   box.appendChild(calib);
 
-  if (belowMin) {
-    addLine(
-      box,
-      ' Фактический КЭП ' + fmt(kep, 3) + ' ниже целевого минимума ' + fmt(minKep, 3) +
-      '. Разрыв до минимального уровня — ' + fmt(minKep - kep, 3) +
-      '. Теоретический резерв составляет ' + fmt(reserveFloor, 1) +
-      ' м² продаваемой площади на этаж и ' + fmt(reserveHouse, 0) + ' м² по дому.',
-      'Базовый резерв.'
-    );
+  const entryText = entrySell > 0
+    ? ' До нижней рабочей границы ' + fmt(workingMin, 3) + ': теоретически +' + fmt(entrySell, 1) + ' м² продаваемой площади на этаж или сокращение площади этажа с ' + fmt(b, 1) + ' до ' + fmt(entryBuild, 1) + ' м².'
+    : ' Нижняя рабочая граница ' + fmt(workingMin, 3) + ' уже достигнута.';
+  addLine(box, entryText, 'Рабочая граница.');
 
-    addLine(
-      box,
-      ' Потенциальный эффект до целевого минимума — ' + rub(revenuePotential) +
-      ' дополнительной выручки за ' + floors +
-      ' типовых этажей. Альтернативный сценарий при сохранении площади квартир — сокращение расчетной площади этажа с ' +
-      fmt(b, 1) + ' до ' + fmt(minBuildArea, 1) +
-      ' м², что соответствует верхней оценке снижения СМР до ' + rub(costPotential) + '.',
-      'Деньги.'
-    );
-  } else if (inTargetZone) {
-    addLine(
-      box,
-      ' Фактический КЭП ' + fmt(kep, 3) + ' находится внутри целевого диапазона ' +
-      fmt(minKep, 3) + '–' + fmt(maxKep, 3) +
-      '. Базовый резерв эффективности и денежный профит не фиксируются.',
-      'Результат.'
-    );
-  } else {
-    addLine(
-      box,
-      ' Фактический КЭП ' + fmt(kep, 3) + ' выше верхней границы целевого диапазона ' +
-      fmt(maxKep, 3) +
-      '. Дополнительный денежный профит по КЭП не рассчитывается; рекомендуется проверить баланс продукта, МОП и квартирографии.',
-      'Результат.'
-    );
-  }
+  const targetText = targetSell > 0
+    ? ' Теоретический разрыв до КЭП ' + fmt(target, 3) + ' — ' + fmt(targetSell, 1) + ' м² продаваемой площади на этаж. При ' + c + ' квартирах Sср должна измениться с ' + fmt(avgCalc, 1) + ' до ' + fmt(targetAvg, 1) + ' м². Альтернатива — сохранить ' + fmt(a, 1) + ' м² квартир и сократить площадь этажа с ' + fmt(b, 1) + ' до ' + fmt(targetBuild, 1) + ' м².'
+    : ' Целевой КЭП ' + fmt(target, 3) + ' уже достигнут или превышен.';
+  addLine(box, targetText, 'Цель.');
 
-  if (!aboveMax && target > kep) {
-    const targetScenario =
-      ' Математически ориентир КЭП ' + fmt(target, 3) +
-      ' при сохранении площади этажа соответствует Sпрод ' + fmt(targetSellArea, 1) +
-      ' м² и Sср ' + fmt(targetAvg, 1) + ' м² при ' + c +
-      ' квартирах. Альтернатива — при сохранении ' + fmt(a, 1) +
-      ' м² квартир сократить расчетную площадь этажа до ' + fmt(targetBuild, 1) +
-      ' м². Этот сценарий может рассматриваться только если полученные параметры удовлетворяют Атрибутивной модели, квартирографии и геометрии этажа. Увеличение Sср само по себе не является рекомендацией.';
-    addLine(box, targetScenario, 'Дополнительный сценарий.');
-    if (targetCompatible) {
-      addLine(
-        box,
-        ' Сценарий попадает в математический диапазон расчетной выборки, но все равно требует проверки соответствия Атрибутивной модели.',
-        'Проверка.'
-      );
-    }
-  }
+  const moneyText = targetSell > 0
+    ? ' Рост продаваемой площади дает верхнюю теоретическую оценку ' + rub(revenuePotential) + ' дополнительной выручки за ' + floors + ' типовых этажей. Альтернатива через сокращение площади — до ' + rub(costPotential) + ' снижения СМР при ставке ' + fmt(smr, 0) + ' ₽/м².'
+    : ' Дополнительный денежный резерв до целевого КЭП не рассчитывается.';
+  addLine(box, moneyText, 'Деньги.');
 
-  if (reasons.length) {
-    addLine(box, ' ' + reasons.join('; ') + '.', 'Ограничения.');
-  }
+  if (reasons.length) addLine(box, ' ' + reasons.join('; ') + '.', 'Ограничения.');
 
   addLine(
     box,
-    ' Расчет является предварительной оценкой. Для подтверждения решения требуется проверка Атрибутивной модели и конкретной геометрии типового этажа.',
+    mathConfirmed
+      ? ' Цель подтверждается математическим расчётным массивом для этой комбинации. Геометрия и квартирография конкретного этажа требуют отдельной проверки.'
+      : ' Это теоретическая верхняя граница. Реализуемость требует проверки квартирографии и геометрии этажа.',
     'Реализуемость.'
   );
 
   window.__PROEKTSET_META_CORE_STATE__ = {
     type, b, a, c, av: avgCalc, floors, price, smr, kep,
-    target, lo: minKep, hi: maxKep,
-    delta: belowMin ? minKep - kep : 0,
-    reserveFloor, reserveHouse,
-    revenuePotential, costPotential,
-    currentConfirmed, targetCompatible,
-    baseGap: belowMin,
-    status: level
+    target, lo: platform.working[0], hi: platform.working[1],
+    delta: Math.max(0, target - kep), reserveFloor: targetSell, reserveHouse,
+    revenuePotential, costPotential, mathConfirmed, status: level
   };
 }
 
@@ -466,9 +363,9 @@ async function saveMetaResult() {
       if (anon.error) throw anon.error;
       session = anon.data.session;
     }
-    const confirmedReserveFloor = state.baseGap ? state.reserveFloor : 0;
-    const confirmedReserveHouse = state.baseGap ? state.reserveHouse : 0;
-    const confirmedEffect = state.baseGap ? state.revenuePotential : 0;
+    const confirmedReserveFloor = state.mathConfirmed ? state.reserveFloor : 0;
+    const confirmedReserveHouse = state.mathConfirmed ? state.reserveHouse : 0;
+    const confirmedEffect = state.mathConfirmed ? state.revenuePotential : 0;
     const { error } = await sb.from('calculations').insert({
       user_id: session.user.id,
       house_type: state.type,
@@ -479,20 +376,20 @@ async function saveMetaResult() {
       typical_floors: state.floors,
       sale_price: state.price,
       kep: state.kep,
-      status: state.status + (state.baseGap ? ' | BELOW_MIN' : ' | TARGET_ZONE'),
+      status: state.status + (state.mathConfirmed ? ' | META_OK' : ' | THEORETICAL'),
       target_kep: state.target,
       range_low: state.lo,
       range_high: state.hi,
       delta_kep: state.delta,
       reserve_floor: confirmedReserveFloor,
       reserve_total: confirmedReserveHouse,
-      realization_coeff: state.baseGap ? 1 : 0,
+      realization_coeff: state.mathConfirmed ? 1 : 0,
       economic_effect: confirmedEffect,
       complex_name: $('complex')?.value.trim() || null,
       region: $('region')?.value.trim() || null
     });
     if (error) throw error;
-    show(state.baseGap ? 'Расчет сохранен. В статистику включен резерв только до целевого минимума.' : 'Расчет сохранен. Денежный резерв не зафиксирован, так как КЭП находится в целевом диапазоне или выше него.');
+    show(state.mathConfirmed ? 'Расчет сохранен. Потенциал подтвержден математической калибровкой расчётная модель.' : 'Расчет сохранен как теоретический; неподтвержденный эффект не включен в общую статистику.');
   } catch (e) {
     console.error(e);
     show('Не удалось сохранить расчет: ' + (e?.message || 'ошибка'), true);
@@ -511,8 +408,8 @@ ensureInfoModal();
 addTypeInfoButton();
 addInfoButtonToLabel('build', 'Площадь этажа для расчета КЭП', 'Площадь типового этажа по наружной грани строительных ограждающих конструкций, за вычетом площадей лифтовых шахт и балконов. Это знаменатель формулы КЭП.');
 addInfoButtonToLabel('apt', 'Площадь квартир', 'Суммарная площадь квартир типового этажа с учетом лоджий. Это числитель формулы КЭП.');
-addInfoButtonToLabel('count', 'Количество квартир', 'Количество квартир на типовом этаже. Используется вместе с площадью квартир для расчета фактической средней площади. Любое изменение квартирности или Sср должно дополнительно проверяться на соответствие Атрибутивной модели.');
-addInfoButtonToLabel('avg', 'Средняя площадь квартиры', 'Контрольный показатель квартирографии. Ядро считает Sср = площадь квартир / количество квартир и сравнивает с введенным значением. Расхождение более 5% помечается как ошибка. Изменение Sср не является самостоятельной рекомендацией и допустимо только при соответствии Атрибутивной модели.');
+addInfoButtonToLabel('count', 'Количество квартир', 'Количество квартир на типовом этаже. Используется вместе с площадью квартир для расчета фактической средней площади и для проверки допустимой квартирности по расчётной модели.');
+addInfoButtonToLabel('avg', 'Средняя площадь квартиры', 'Контрольный показатель квартирографии. Ядро дополнительно считает Sср = площадь квартир / количество квартир и сравнивает с введенным значением. Расхождение более 5% помечается как ошибка исходных данных.');
 addInfoButtonToLabel('floors', 'Количество типовых этажей', 'Используется для перевода эффекта одного типового этажа в эффект по дому: резерв площади, дополнительная выручка и возможное снижение СМР.');
 addInfoButtonToLabel('price', 'Цена реализации', 'Цена продажи 1 м². Используется для оценки верхней границы дополнительной выручки от потенциального роста продаваемой площади.');
 addInfoButtonToLabel('smr', 'СМР', 'Стоимость строительно-монтажных работ на 1 м². Используется в альтернативном сценарии: оценка экономии при сокращении строительной площади без уменьшения площади квартир.');
