@@ -27,7 +27,7 @@
 <label>Типовых этажей<input id="floors" type="number" value="25" min="1"></label>
 <label>Цена реализации, ₽/м²<input id="price" type="number" value="165000" min="0"></label>
 </div><div id="validation" class="note" style="margin-top:10px"></div></section>
-<section class="panel output"><div class="title"><b>Результат</b><span>КЭП</span></div><div id="kep" class="kep">0,723</div><div id="badge" class="badge">—</div><div class="rows"><div class="row"><span>Эффективный диапазон</span><b id="range">—</b></div><div class="row"><span>Целевой КЭП</span><b id="target">—</b></div><div class="row"><span>Δ до цели</span><b id="delta">—</b></div></div><div class="metrics"><div class="metric"><small>Резерв / этаж</small><strong id="rf">—</strong></div><div class="metric"><small>Резерв / дом</small><strong id="rt">—</strong></div><div class="metric money"><small>Экономический потенциал</small><strong id="effect">—</strong></div></div>
+<section class="panel output"><div class="title"><b>Результат</b><span>КЭП</span></div><div id="kep" class="kep">0,723</div><div id="badge" class="badge">—</div><div class="rows"><div class="row"><span>Эффективный диапазон</span><b id="range">—</b></div><div class="row"><span>Целевой КЭП</span><b id="target">—</b></div><div class="row"><span>Δ до цели</span><b id="delta">—</b></div></div><div class="metrics"><div class="metric"><small>Резерв / этаж</small><strong id="rf">—</strong></div><div class="metric"><small>Резерв / дом</small><strong id="rt">—</strong></div><div class="metric money"><small>Потенциал до минимума</small><strong id="effect">—</strong></div></div>
 <div class="save"><b>Сохранить результат в базу</b><div class="two" style="margin-top:8px"><label>Наименование ЖК *<input id="complex" placeholder="необязательно"></label><label>Регион<input id="region" placeholder="Например, Новосибирская область"></label></div><div class="note" style="color:#aebbb5;margin-top:5px">* необязательно к заполнению</div><button id="saveBtn" class="btn primary" type="button">Сохранить результат</button><div id="saveStatus" class="status"></div></div>
 </section></div></main>
 </div></div>
@@ -169,7 +169,29 @@ const $=id=>document.getElementById(id),num=id=>Number($(id).value)||0,fmt=(v,d=
 let last=null,sb=null,user=null;
 function type(){return document.querySelector('input[name=type]:checked').value}
 function model(){return type()==='T'?{lo:.720,hi:.745,target:.740}:{lo:.705,hi:.735,target:.730}}
-function calc(){const b=num('build'),a=num('apt'),c=Math.max(1,Math.round(num('count'))),av=num('avg'),f=Math.max(1,Math.round(num('floors'))),p=num('price'),m=model();if(!b||!a){return}const k=a/b;let key,label;if(k<m.lo-.015)[key,label]=['low','НИЗКИЙ'];else if(k<m.lo)[key,label]=['medium','СРЕДНИЙ'];else if(k<m.target-.003)[key,label]=['high','ВЫСОКИЙ'];else if(k<=m.hi+.004)[key,label]=['optimal','ОПТИМАЛЬНЫЙ'];else[key,label]=['high','ВЫСОКИЙ — ПРОВЕРИТЬ БАЛАНС'];const d=Math.max(0,m.target-k),rf=d*b,rt=rf*f,kr=key==='low'?1:key==='medium'?.6:0,e=rt*p*kr;last={type:type(),b,a,c,av,f,p,k,label,target:m.target,lo:m.lo,hi:m.hi,d,rf,rt,kr,e};$('kep').textContent=fmt(k,3);$('badge').textContent=label;$('badge').style.background=key==='low'?'var(--bad)':key==='medium'?'var(--warn)':'var(--good)';$('range').textContent=fmt(m.lo,3)+' — '+fmt(m.hi,3);$('target').textContent=fmt(m.target,3);$('delta').textContent=d?'+'+fmt(d,3):'0,000';$('rf').textContent=kr?'+'+fmt(rf,1)+' м²':'—';$('rt').textContent=kr?'+'+fmt(rt,0)+' м²':'—';$('effect').textContent=kr?rub(e):'—';const chk=c*av;$('validation').textContent=Math.abs(chk-a)/Math.max(a,1)>.05?'Проверьте данные: количество квартир × средняя площадь отличается от площади квартир более чем на 5%.':'Проверка данных: '+c+' × '+fmt(av,1)+' ≈ '+fmt(chk,1)+' м².'}
+function calc(){
+  const b=num('build'),a=num('apt'),c=Math.max(1,Math.round(num('count'))),av=num('avg');
+  const f=Math.max(1,Math.round(num('floors'))),p=num('price'),m=model();
+  if(!b||!a||a>b)return;
+  const k=a/b,below=k<m.lo,above=k>m.hi;
+  const label=below?'НИЖЕ ЦЕЛЕВОГО МИНИМУМА':above?'ВЫШЕ ЦЕЛЕВОГО ДИАПАЗОНА':'ЦЕЛЕВОЙ ДИАПАЗОН ДОСТИГНУТ';
+  const d=below?m.lo-k:0;
+  const rf=below?Math.max(0,m.lo*b-a):0,rt=rf*f,kr=below?1:0,e=rt*p;
+  last={type:type(),b,a,c,av,f,p,k,label,target:m.target,lo:m.lo,hi:m.hi,d,rf,rt,kr,e};
+  $('kep').textContent=fmt(k,3);
+  $('badge').textContent=label;
+  $('badge').style.background=below?'var(--bad)':above?'var(--warn)':'var(--good)';
+  $('range').textContent=fmt(m.lo,3)+' — '+fmt(m.hi,3);
+  $('target').textContent=fmt(m.target,3);
+  $('delta').textContent=below?'+'+fmt(d,3):'0,000';
+  $('rf').textContent=below?'+'+fmt(rf,1)+' м²':'—';
+  $('rt').textContent=below?'+'+fmt(rt,0)+' м²':'—';
+  $('effect').textContent=below?rub(e):'—';
+  const chk=c*av;
+  $('validation').textContent=Math.abs(chk-a)/Math.max(a,1)>.05?
+    'Проверьте данные: количество квартир × средняя площадь отличается от площади квартир более чем на 5%.':
+    'Проверка данных: '+c+' × '+fmt(av,1)+' ≈ '+fmt(chk,1)+' м².';
+}
 ['build','apt','count','avg','floors','price'].forEach(id=>$(id).addEventListener('input',calc));document.querySelectorAll('input[name=type]').forEach(x=>x.addEventListener('change',calc));calc();
 document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>$(b.dataset.open).classList.add('open'));document.querySelectorAll('.modalBack').forEach(m=>{m.onclick=e=>{if(e.target===m)m.classList.remove('open')};m.querySelector('.close').onclick=()=>m.classList.remove('open')});
 function stat(t,err=false){const e=$('saveStatus');e.textContent=t;e.className='status show'+(err?' err':'')}
@@ -184,5 +206,5 @@ $('chatForm').onsubmit=async e=>{e.preventDefault();const t=$('chatText').value.
 $('saveBtn').onclick=async()=>{if(!last||!sb||!user)return stat('База пока не подключена.',true);stat('Сохраняем…');const r=last,{error}=await sb.from('calculations').insert({user_id:user.id,house_type:r.type,building_area:r.b,apartment_area:r.a,apartment_count:r.c,avg_apartment_area:r.av,typical_floors:r.f,sale_price:r.p,kep:r.k,status:r.label,target_kep:r.target,range_low:r.lo,range_high:r.hi,delta_kep:r.d,reserve_floor:r.rf,reserve_total:r.rt,realization_coeff:r.kr,economic_effect:r.e,complex_name:$('complex').value.trim()||null,region:$('region').value.trim()||null});if(error)return stat('Не удалось сохранить расчет.',true);stat('Расчет сохранен в базе ПРОЕКТСЕТИ.');loadStats()};
 init();
 </script>
-<script type="module" src="./meta_core.js?v=6"></script>
+<script type="module" src="./meta_core_v7.js"></script>
 </body></html>
