@@ -82,7 +82,7 @@ function next(i,prev=-1){
  if(focus>=0){a.sort((u,v)=>distToTarget(u.to,focus)-distToTarget(v.to,focus));return Math.random()<.88?a[0]:a[Math.floor(Math.random()*Math.min(3,a.length))]}
  return a[Math.floor(Math.random()*a.length)];
 }
-function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused?.00072:.00046,prev:-1})}
+function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused ? .00072 : .00046,prev:-1})}
 function bez(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
 function exciteMouse(){
  if(!mouse.active)return;
@@ -106,7 +106,7 @@ function draw(ms){
  if(n.fire>.12){ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?5.5:4)+n.fire*7,0,6.283);ctx.strokeStyle='rgba(0,220,170,'+(n.fire*.18)+')';ctx.lineWidth=.8;ctx.stroke()}ctx.restore()}
  for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];e.heat=Math.min(1,e.heat+.035);s.t+=s.v*dt;const head=Math.min(1,s.t),tail=Math.max(0,head-.075);ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=8;ctx.lineCap='round';ctx.lineWidth=2.15;ctx.beginPath();for(let q=0;q<=8;q++){const u=tail+(head-tail)*q/8,p=bez(a,b,e.k,u);if(q===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}ctx.strokeStyle='rgba(0,235,180,.78)';ctx.stroke();const hp=bez(a,b,e.k,head);ctx.beginPath();ctx.arc(hp.x,hp.y,2.15,0,6.283);ctx.fillStyle='rgba(225,255,248,.98)';ctx.fill();ctx.restore()}
    if(s.t>=1){N[s.to].fire=1;const arrived=s.to,prev=s.from;if(N[arrived].virtual){const ti=N[arrived].target;if(focus===ti)targets[ti].el.animate([{boxShadow:'0 18px 45px rgba(0,169,132,.10)'},{boxShadow:'0 0 0 1px rgba(0,235,180,.35),0 20px 55px rgba(0,169,132,.20)'},{boxShadow:'0 18px 45px rgba(0,169,132,.10)'}],{duration:520});S.splice(i,1);continue}
-     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0?.00072:.00046}else S.splice(i,1)}
+     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0 ? .00072 : .00046}else S.splice(i,1)}
  }
  if(mouse.active&&Math.random()<.035)exciteMouse();if(Math.random()<.004&&targets.length){const kt=targets.findIndex(t=>t.el.classList.contains('kep'));if(kt>=0&&targets[kt].links.length){const v=targets[kt].links[Math.floor(Math.random()*targets[kt].links.length)],z=adj(v)[0];if(z)spawn(z.to,false)}}if(S.length<15&&Math.random()<.018)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
  raf=requestAnimationFrame(draw);
