@@ -11,17 +11,19 @@
 const c=document.getElementById('net'),x=c.getContext('2d');let W,H,d=1,N=[],E=[],P=[],raf=0;
 function build(){
  d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
- const cols=Math.max(7,Math.round(W/170)),rows=Math.max(4,Math.round(H/150));N=[];
- for(let r=0;r<rows;r++)for(let q=0;q<cols;q++){const ox=(r%2)*.5;N.push({bx:(q+.55+ox)*W/(cols+.35),by:(r+.65)*H/(rows+.3),ph:Math.random()*6.28,amp:1.5+Math.random()*3})}
- E=[];for(let i=0;i<N.length;i++){let ds=N.map((n,j)=>({j,v:j===i?1e9:Math.hypot(N[i].bx-n.bx,N[i].by-n.by)})).sort((a,b)=>a.v-b.v).slice(0,3);for(const z of ds){let a=Math.min(i,z.j),b=Math.max(i,z.j);if(!E.some(e=>e.a===a&&e.b===b))E.push({a,b})}}
- P=Array.from({length:Math.max(16,Math.round(E.length*.28))},()=>({e:Math.floor(Math.random()*E.length),t:Math.random(),v:.0015+Math.random()*.0035,dir:Math.random()<.5?1:-1,r:1.5+Math.random()*1.4}));
+ const count=Math.max(34,Math.min(62,Math.round(W*H/28000)));N=[];
+ for(let i=0;i<count;i++){let bx,by,ok=false,k=0;while(!ok&&k++<40){bx=35+Math.random()*(W-70);by=35+Math.random()*(H-70);ok=N.every(n=>Math.hypot(bx-n.bx,by-n.by)>42)}N.push({bx,by,ph:Math.random()*6.283,ph2:Math.random()*6.283,ax:2+Math.random()*4.5,ay:2+Math.random()*4.5})}
+ E=[];
+ for(let i=0;i<N.length;i++){const ds=N.map((n,j)=>({j,v:j===i?1e9:Math.hypot(N[i].bx-n.bx,N[i].by-n.by)})).sort((a,b)=>a.v-b.v);const take=2+(Math.random()<.32?1:0);for(const z of ds.slice(0,take)){if(z.v>245)continue;const a=Math.min(i,z.j),b=Math.max(i,z.j);if(!E.some(e=>e.a===a&&e.b===b))E.push({a,b,bend:(Math.random()-.5)*22})}}
+ P=Array.from({length:Math.max(18,Math.round(E.length*.30))},()=>({e:Math.floor(Math.random()*E.length),t:Math.random(),v:.0012+Math.random()*.0038,dir:Math.random()<.5?1:-1,r:2.1+Math.random()*1.5}));
 }
+function quad(a,b,bend,u){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=mx-dy/L*bend,cy=my+dx/L*bend,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
 function draw(ms){
  x.clearRect(0,0,W,H);const t=ms*.001;
- const pos=N.map(n=>({x:n.bx+Math.sin(t*.55+n.ph)*n.amp,y:n.by+Math.cos(t*.47+n.ph)*n.amp}));
- for(const e of E){const a=pos[e.a],b=pos[e.b];x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.strokeStyle='rgba(8,125,165,.30)';x.lineWidth=1.55;x.stroke()}
- for(const n of pos){x.beginPath();x.arc(n.x,n.y,2.35,0,6.283);x.fillStyle='rgba(0,220,165,1)';x.fill()}
- for(const p of P){p.t+=p.v*p.dir;if(p.t>1){p.t=1;p.dir=-1;p.v=.0015+Math.random()*.0035}if(p.t<0){p.t=0;p.dir=1;p.v=.0015+Math.random()*.0035}const e=E[p.e],a=pos[e.a],b=pos[e.b],px=a.x+(b.x-a.x)*p.t,py=a.y+(b.y-a.y)*p.t;x.beginPath();x.arc(px,py,p.r,0,6.283);x.fillStyle='rgba(0,245,185,1)';x.fill()}
+ const pos=N.map(n=>({x:n.bx+Math.sin(t*.34+n.ph)*n.ax+Math.sin(t*.17+n.ph2)*1.8,y:n.by+Math.cos(t*.29+n.ph)*n.ay+Math.cos(t*.15+n.ph2)*1.8}));
+ for(const e of E){const a=pos[e.a],b=pos[e.b],m=quad(a,b,e.bend,.5);x.beginPath();x.moveTo(a.x,a.y);x.quadraticCurveTo(m.cx,m.cy,b.x,b.y);x.strokeStyle='rgba(8,125,165,.25)';x.lineWidth=1.35;x.stroke()}
+ for(const n of pos){x.beginPath();x.arc(n.x,n.y,2.7,0,6.283);x.fillStyle='rgba(0,228,171,1)';x.fill()}
+ for(const p of P){p.t+=p.v*p.dir;if(p.t>1||p.t<0){p.dir*=-1;p.t=Math.max(0,Math.min(1,p.t));p.v=.0012+Math.random()*.0038}const e=E[p.e],a=pos[e.a],b=pos[e.b],q=quad(a,b,e.bend,p.t);x.save();x.shadowColor='rgba(0,255,194,.95)';x.shadowBlur=9;x.beginPath();x.arc(q.x,q.y,p.r,0,6.283);x.fillStyle='rgba(0,255,194,1)';x.fill();x.restore()}
  raf=requestAnimationFrame(draw)
 }
 addEventListener('resize',()=>{cancelAnimationFrame(raf);build();raf=requestAnimationFrame(draw)});build();raf=requestAnimationFrame(draw);
