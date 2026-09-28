@@ -29,17 +29,7 @@
 .node[href="./research.html"]:hover{box-shadow:0 18px 52px rgba(8,125,165,.14)}
 
 .node.receiving{border-color:rgba(0,220,170,.72);box-shadow:0 0 0 1px rgba(0,220,170,.12),0 22px 60px rgba(0,169,132,.18)}
-.node.receiving{border-color:rgba(0,220,170,.62)!important;box-shadow:0 0 0 1px rgba(0,220,170,.10),0 20px 58px rgba(0,169,132,.18)!important;transform:translateY(-3px) scale(1.012)}.kep.receiving{box-shadow:0 0 110px rgba(0,210,165,.22)!important}
-.node.receiving:after{opacity:1;transform:none;color:#008f70}
-.node.receiving{animation:cardReceive 2.2s ease-in-out infinite}
-@keyframes cardReceive{0%,100%{filter:saturate(1)}50%{filter:saturate(1.08)}}
-.kep.receiving:before{opacity:1;transform:scale(1.045)}
-
-.node,.kep{--network-glow:0}
-.node.receiving,.kep.receiving{--network-glow:1}
-.node.receiving{outline:1px solid rgba(0,220,170,.08);outline-offset:4px}
-.kep.receiving{transform:scale(1.012)}
-</style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
+.node.receiving{border-color:rgba(0,220,170,.62)!important;box-shadow:0 0 0 1px rgba(0,220,170,.10),0 20px 58px rgba(0,169,132,.18)!important;transform:translateY(-3px) scale(1.012)}.kep.receiving{box-shadow:0 0 110px rgba(0,210,165,.22)!important}</style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
 <a class="node" href="./tools.html"><div class="k">РАЗДЕЛ</div><b>Инструменты</b><small>Расчётные и аналитические инструменты для проверки и повышения эффективности проекта.</small></a>
 <a class="node" href="./research.html"><div class="k">ИССЛЕДОВАНИЯ</div><b>База исследований</b><small>Проверенные научные работы, данные и практические выводы для проектировщика.</small></a>
 <a class="node" href="#"><div class="k">РЕШЕНИЯ</div><b>Инженерные решения</b><small>Собирать и сравнивать решения, повышающие эффективность проекта.</small></a>
@@ -48,7 +38,7 @@
 <section class="side right"><a class="node" href="#"><div class="k">АУДИТ</div><b>Проверить проект</b><small>Найти резервы КЭП, планировки, конструктивных решений и себестоимости.</small></a><a class="node" href="#"><div class="k">ОПТИМИЗАЦИЯ</div><b>Разобрать решение</b><small>Определить уровень вмешательства и потенциал улучшения.</small></a></section></main><footer class="foot"><div><span class="live">● LIVE</span> ПРОЕКТСЕТЬ · инструменты ↔ исследования ↔ практика ↔ аудит</div><div>2026</div></footer></div>
 <script>
 const cv=document.getElementById('net'),ctx=cv.getContext('2d');
-let W=0,H=0,D=1,N=[],E=[],S=[],targets=[],focus=-1,last=0,raf=0,mouse={x:-9999,y:-9999,active:false},trail=[];
+let W=0,H=0,D=1,N=[],E=[],S=[],targets=[],focus=-1,last=0,raf=0;
 const R=(a,b)=>a+Math.random()*(b-a);
 function resize(){
  D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(D,0,0,D,0,0);build();
@@ -61,14 +51,14 @@ function build(){
  for(let y=58;y<H-42;y+=step)for(let x=42;x<W-32;x+=step){
    let px=x+R(-30,30),py=y+R(-28,28);if(!insideCard(px,py,22))N.push({x:px,y:py,ph:R(0,6.28),fire:0,hub:0});
  }
- function add(a,b,type=0){if(a===b||E.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a)))return;E.push({a,b,type,k:R(-22,22),ph:R(0,6.28),pulse:R(.75,1.25),heat:0})}
+ function add(a,b,type=0){if(a===b||E.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a)))return;E.push({a,b,type,k:R(-22,22)})}
  for(let i=0;i<N.length;i++){
    const near=N.map((n,j)=>({j,d:j===i?1e9:Math.hypot(N[i].x-n.x,N[i].y-n.y)})).sort((a,b)=>a.d-b.d);
    near.slice(0,2+(Math.random()<.38?1:0)).forEach(z=>{if(z.d<step*1.9)add(i,z.j)});
  }
  // Card ports are virtual graph nodes; links terminate at card edges.
  targets.forEach((t,ti)=>{
-   const cand=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,t.el.classList.contains('kep')?9:5);
+   const cand=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,5);
    cand.forEach(z=>{const vi=N.length;N.push({x:t.x,y:t.y,ph:0,fire:0,virtual:true,target:ti,source:z.i});add(z.i,vi,1);t.links.push(vi)});
  });
  for(let i=0;i<N.length;i++)N[i].hub=adj(i).length>=4?1:0;
@@ -82,33 +72,23 @@ function next(i,prev=-1){
  if(focus>=0){a.sort((u,v)=>distToTarget(u.to,focus)-distToTarget(v.to,focus));return Math.random()<.88?a[0]:a[Math.floor(Math.random()*Math.min(3,a.length))]}
  return a[Math.floor(Math.random()*a.length)];
 }
-function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused ? .00072 : .00046,prev:-1})}
+function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused?.00072:.00046,prev:-1})}
 function bez(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
-function exciteMouse(){
- if(!mouse.active)return;
- const near=N.slice(0,Math.max(1,N.length-targets.reduce((s,t)=>s+t.links.length,0))).map((n,i)=>({i,d:Math.hypot(n.x-mouse.x,n.y-mouse.y)})).filter(o=>o.d<105).sort((a,b)=>a.d-b.d).slice(0,4);
- near.forEach(o=>{N[o.i].fire=Math.max(N[o.i].fire,.42*(1-o.d/120))});
-}
-addEventListener('pointermove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;mouse.active=true;exciteMouse()},{passive:true});
-addEventListener('pointerleave',()=>{mouse.active=false});
 function bind(){
- targets.forEach((t,i)=>{t.el.addEventListener('mouseenter',()=>{focus=i;t.el.classList.add('receiving');if(mouse.active){let m=N.map((n,j)=>({n,j})).filter(o=>!o.n.virtual).map(o=>({j:o.j,d:Math.hypot(o.n.x-mouse.x,o.n.y-mouse.y)})).sort((a,b)=>a.d-b.d).slice(0,3);m.forEach((o,k)=>setTimeout(()=>{if(focus===i)spawn(o.j,true)},k*160))}for(let q=0;q<12;q++)setTimeout(()=>{if(focus===i){const pool=N.slice(0,Math.max(1,N.length-targets.length*5)).map((n,j)=>({j,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>b.d-a.d);const band=pool.slice(Math.floor(pool.length*.18),Math.max(Math.floor(pool.length*.18)+1,Math.floor(pool.length*.82)));spawn(band[Math.floor(Math.random()*band.length)].j,true)}},q*190)});t.el.addEventListener('mouseleave',()=>{if(focus===i)focus=-1;t.el.classList.remove('receiving')})});
+ targets.forEach((t,i)=>{t.el.addEventListener('mouseenter',()=>{focus=i;t.el.classList.add('receiving');for(let q=0;q<7;q++)setTimeout(()=>spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),true),q*130)});t.el.addEventListener('mouseleave',()=>{if(focus===i)focus=-1;t.el.classList.remove('receiving')})});
 }
 function draw(ms){
  const dt=Math.min(34,ms-last||16);last=ms;ctx.clearRect(0,0,W,H);
  const P=N.map((_,i)=>pos(i,ms));
- for(const e of E){e.heat*=.982;const a=P[e.a],b=P[e.b],g=bez(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);let active=false;if(focus>=0){const da=distToTarget(e.a,focus),db=distToTarget(e.b,focus);active=Math.abs(da-db)>8&&Math.min(da,db)<420}
- const breath=.78+.22*Math.sin(ms*.00042*e.pulse+e.ph);
- const alpha=Math.min(.62,(e.type?(focus>=0 ? .48 : .30+.08*breath):(focus>=0?(active ? .20+.10*breath : .065):.12+.07*breath))+e.heat*.22);
- ctx.strokeStyle=e.type?'rgba(0,169,132,'+alpha+')':(active?'rgba(0,169,132,'+alpha+')':'rgba(8,125,165,'+alpha+')');
- ctx.lineWidth=e.type?1.45:(active?1.15:.85);ctx.stroke()}
- for(let i=0;i<N.length;i++){const n=N[i];if(n.virtual)continue;n.fire*=.95;const p=P[i];ctx.save();ctx.shadowColor='rgba(0,220,170,.75)';ctx.shadowBlur=4+n.fire*13;ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?2.45:1.65)+n.fire*1.7,0,Math.PI*2);ctx.fillStyle=n.hub?'rgba(0,169,132,'+(.72+n.fire*.25)+')':'rgba(0,169,132,'+(.44+n.fire*.42)+')';ctx.fill();
- if(n.fire>.12){ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?5.5:4)+n.fire*7,0,6.283);ctx.strokeStyle='rgba(0,220,170,'+(n.fire*.18)+')';ctx.lineWidth=.8;ctx.stroke()}ctx.restore()}
- for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];e.heat=Math.min(1,e.heat+.035);s.t+=s.v*dt;const head=Math.min(1,s.t),tail=Math.max(0,head-.075);ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=8;ctx.lineCap='round';ctx.lineWidth=2.15;ctx.beginPath();for(let q=0;q<=8;q++){const u=tail+(head-tail)*q/8,p=bez(a,b,e.k,u);if(q===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}ctx.strokeStyle='rgba(0,235,180,.78)';ctx.stroke();const hp=bez(a,b,e.k,head);ctx.beginPath();ctx.arc(hp.x,hp.y,2.15,0,6.283);ctx.fillStyle='rgba(225,255,248,.98)';ctx.fill();ctx.restore()}
+ for(const e of E){const a=P[e.a],b=P[e.b],g=bez(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);let active=false;if(focus>=0){const da=distToTarget(e.a,focus),db=distToTarget(e.b,focus);active=Math.abs(da-db)>8&&Math.min(da,db)<420}
+ ctx.strokeStyle=e.type?(focus>=0?'rgba(0,185,145,.46)':'rgba(0,169,132,.34)'):(focus>=0?(active?'rgba(0,169,132,.28)':'rgba(8,125,165,.095)'):'rgba(8,125,165,.17)');
+ ctx.lineWidth=e.type?1.45:(active?1.18:.9);ctx.stroke()}
+ for(let i=0;i<N.length;i++){const n=N[i];if(n.virtual)continue;n.fire*=.95;const p=P[i];ctx.save();ctx.shadowColor='rgba(0,220,170,.75)';ctx.shadowBlur=4+n.fire*13;ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?2.45:1.65)+n.fire*1.7,0,Math.PI*2);ctx.fillStyle=n.hub?'rgba(0,169,132,'+(.72+n.fire*.25)+')':'rgba(0,169,132,'+(.44+n.fire*.42)+')';ctx.fill();ctx.restore()}
+ for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];s.t+=s.v*dt;const head=Math.min(1,s.t);for(let tail=6;tail>=0;tail--){const u=Math.max(0,head-tail*.014),p=bez(a,b,e.k,u),alpha=(1-tail/7)*.88;ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=tail===0?12:4;ctx.beginPath();ctx.arc(p.x,p.y,tail===0?2.35:1.2,0,6.283);ctx.fillStyle='rgba(0,235,180,'+alpha+')';ctx.fill();ctx.restore()}
    if(s.t>=1){N[s.to].fire=1;const arrived=s.to,prev=s.from;if(N[arrived].virtual){const ti=N[arrived].target;if(focus===ti)targets[ti].el.animate([{boxShadow:'0 18px 45px rgba(0,169,132,.10)'},{boxShadow:'0 0 0 1px rgba(0,235,180,.35),0 20px 55px rgba(0,169,132,.20)'},{boxShadow:'0 18px 45px rgba(0,169,132,.10)'}],{duration:520});S.splice(i,1);continue}
-     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0 ? .00072 : .00046}else S.splice(i,1)}
+     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0?.00072:.00046}else S.splice(i,1)}
  }
- if(mouse.active&&Math.random()<.035)exciteMouse();if(Math.random()<.004&&targets.length){const kt=targets.findIndex(t=>t.el.classList.contains('kep'));if(kt>=0&&targets[kt].links.length){const v=targets[kt].links[Math.floor(Math.random()*targets[kt].links.length)],z=adj(v)[0];if(z)spawn(z.to,false)}}if(S.length<15&&Math.random()<.018)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
+ if(S.length<18&&Math.random()<.025)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
  raf=requestAnimationFrame(draw);
 }
 addEventListener('resize',()=>{cancelAnimationFrame(raf);resize()});resize();bind();raf=requestAnimationFrame(draw);
