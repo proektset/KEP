@@ -27,6 +27,8 @@
 .node[href="./research.html"] .k:before{content:"⌁ ";font-size:12px;color:var(--b)}
 .node[href="./tools.html"]:hover{box-shadow:0 18px 52px rgba(0,169,132,.15)}
 .node[href="./research.html"]:hover{box-shadow:0 18px 52px rgba(8,125,165,.14)}
+
+.node.receiving{border-color:rgba(0,220,170,.72);box-shadow:0 0 0 1px rgba(0,220,170,.12),0 22px 60px rgba(0,169,132,.18)}
 </style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
 <a class="node" href="./tools.html"><div class="k">РАЗДЕЛ</div><b>Инструменты</b><small>Расчётные и аналитические инструменты для проверки и повышения эффективности проекта.</small></a>
 <a class="node" href="./research.html"><div class="k">ИССЛЕДОВАНИЯ</div><b>База исследований</b><small>Проверенные научные работы, данные и практические выводы для проектировщика.</small></a>
@@ -35,7 +37,7 @@
 <section class="center"><a class="kep" href="calculator.html" aria-label="Открыть калькулятор КЭП" style="text-decoration:none;color:inherit"><div><div class="big" style="font-size:clamp(17px,1.7vw,27px);letter-spacing:.12em;margin-bottom:7px">КЭП</div><h1 style="font-size:clamp(25px,2.7vw,43px);line-height:1.02;max-width:78%;margin:0 auto 13px;overflow-wrap:normal">Эффективность<br>планировок</h1><p style="max-width:72%;margin-left:auto;margin-right:auto">Связываем планировку, площадь, себестоимость и качество проектного решения.</p><span style="margin-top:18px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:11px;font-weight:850">Проверить сколько можно сэкономить →</span></div></a></section>
 <section class="side right"><a class="node" href="#"><div class="k">АУДИТ</div><b>Проверить проект</b><small>Найти резервы КЭП, планировки, конструктивных решений и себестоимости.</small></a><a class="node" href="#"><div class="k">ОПТИМИЗАЦИЯ</div><b>Разобрать решение</b><small>Определить уровень вмешательства и потенциал улучшения.</small></a></section></main><footer class="foot"><div><span class="live">● LIVE</span> ПРОЕКТСЕТЬ · инструменты ↔ исследования ↔ практика ↔ аудит</div><div>2026</div></footer></div>
 <script>
-const c=document.getElementById('net'),x=c.getContext('2d'),hero=document.querySelector('.kep');let HN=[];let W,H,d=1,N=[],E=[],S=[],raf=0,lastHero=0;
+const c=document.getElementById('net'),x=c.getContext('2d'),hero=document.querySelector('.kep');let HN=[],focusCard=null,focusStart=0;let W,H,d=1,N=[],E=[],S=[],raf=0,lastHero=0;
 function reset(){
  d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
  const count=Math.max(40,Math.min(72,Math.round(W*H/23500)));N=[];
@@ -47,11 +49,13 @@ function reset(){
 }
 function geom(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
 function nextEdge(node){const choices=[];for(let i=0;i<E.length;i++)if(E[i].a===node||E[i].b===node)choices.push(i);return choices.length?choices[Math.floor(Math.random()*choices.length)]:Math.floor(Math.random()*E.length)}
+document.querySelectorAll('.node').forEach(card=>{card.addEventListener('mouseenter',()=>{focusCard=card;focusStart=performance.now();card.classList.add('receiving')});card.addEventListener('mouseleave',()=>{card.classList.remove('receiving');focusCard=null})});
 function draw(ms){
  x.clearRect(0,0,W,H);const t=ms*.001,P=N.map(n=>({x:n.bx+Math.sin(t*.24+n.ph)*n.ax,y:n.by+Math.cos(t*.20+n.ph)*n.ay}));
  for(const e of E){const a=P[e.a],b=P[e.b],g=geom(a,b,e.curve,.5);x.beginPath();x.moveTo(a.x,a.y);x.quadraticCurveTo(g.cx,g.cy,b.x,b.y);x.strokeStyle='rgba(16,121,154,.18)';x.lineWidth=1.15;x.stroke()}
  const rect=hero.getBoundingClientRect(),hx=rect.left+rect.width/2,hy=rect.top+rect.height/2,hr=rect.width*.48;
  for(const i of HN){const a=P[i],ang=Math.atan2(a.y-hy,a.x-hx),tx=hx+Math.cos(ang)*hr,ty=hy+Math.sin(ang)*hr;x.beginPath();x.moveTo(a.x,a.y);const mx=(a.x+tx)/2+(hy-a.y)*.035,my=(a.y+ty)/2-(hx-a.x)*.035;x.quadraticCurveTo(mx,my,tx,ty);x.strokeStyle='rgba(0,169,132,.13)';x.lineWidth=1.1;x.stroke()}
+ if(focusCard){const r=focusCard.getBoundingClientRect(),tx=r.left+r.width/2,ty=r.top+r.height/2,elapsed=ms-focusStart;for(let i=0;i<P.length;i++){const p=P[i],phase=(elapsed*.0019+i*.071)%1,ease=1-Math.pow(1-phase,3),px=p.x+(tx-p.x)*ease,py=p.y+(ty-p.y)*ease,al=Math.sin(Math.PI*phase);x.save();x.shadowColor='rgba(0,255,194,.95)';x.shadowBlur=11;x.beginPath();x.arc(px,py,1.5+al*1.8,0,6.283);x.fillStyle='rgba(0,255,194,'+(.28+al*.72)+')';x.fill();x.restore()}if((elapsed%520)<28){focusCard.animate([{boxShadow:'0 18px 52px rgba(0,169,132,.15)'},{boxShadow:'0 0 0 2px rgba(0,255,194,.36),0 22px 60px rgba(0,169,132,.23)'},{boxShadow:'0 18px 52px rgba(0,169,132,.15)'}],{duration:430,easing:'ease-out'})}}
  for(let i=0;i<P.length;i++){const p=P[i],n=N[i];n.flash*=.94;const rr=n.r+n.flash*2.5;x.save();x.shadowColor='rgba(0,232,176,'+(.25+n.flash*.65)+')';x.shadowBlur=5+n.flash*13;x.beginPath();x.arc(p.x,p.y,rr,0,6.283);x.fillStyle='rgba(0,220,166,'+(.82+n.flash*.18)+')';x.fill();x.restore()}
  for(const s of S){s.t+=s.v;if(s.t>1){const old=E[s.e],arrival=old.b;N[arrival].flash=1;s.e=nextEdge(arrival);const ne=E[s.e];if(ne.a!==arrival&&ne.b===arrival){const tmp=ne.a;ne.a=ne.b;ne.b=tmp} s.t=0;s.v=.0012+Math.random()*.0028;if(ms-lastHero>1200&&Math.random()<.16){hero.classList.add('signal');setTimeout(()=>hero.classList.remove('signal'),380);lastHero=ms}}
  const e=E[s.e],a=P[e.a],b=P[e.b];for(let z=4;z>=0;z--){const u=Math.max(0,s.t-z*.014),q=geom(a,b,e.curve,u),al=(1-z/5)*.95;x.save();x.shadowColor='rgba(0,255,194,.95)';x.shadowBlur=z===0?12:4;x.beginPath();x.arc(q.x,q.y,z===0?s.r:Math.max(.55,s.r*(1-z/5.8)),0,6.283);x.fillStyle='rgba(0,255,194,'+al+')';x.fill();x.restore()}}
