@@ -72,7 +72,7 @@ function next(i,prev=-1){
  if(focus>=0){a.sort((u,v)=>distToTarget(u.to,focus)-distToTarget(v.to,focus));return Math.random()<.88?a[0]:a[Math.floor(Math.random()*Math.min(3,a.length))]}
  return a[Math.floor(Math.random()*a.length)];
 }
-function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused?.00072:.00046,prev:-1})}
+function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused ? .00072 : .00046,prev:-1})}
 function bez(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
 function bind(){
  targets.forEach((t,i)=>{t.el.addEventListener('mouseenter',()=>{focus=i;t.el.classList.add('receiving');for(let q=0;q<7;q++)setTimeout(()=>spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),true),q*130)});t.el.addEventListener('mouseleave',()=>{if(focus===i)focus=-1;t.el.classList.remove('receiving')})});
@@ -86,7 +86,7 @@ function draw(ms){
  for(let i=0;i<N.length;i++){const n=N[i];if(n.virtual)continue;n.fire*=.95;const p=P[i];ctx.save();ctx.shadowColor='rgba(0,220,170,.75)';ctx.shadowBlur=4+n.fire*13;ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?2.45:1.65)+n.fire*1.7,0,Math.PI*2);ctx.fillStyle=n.hub?'rgba(0,169,132,'+(.72+n.fire*.25)+')':'rgba(0,169,132,'+(.44+n.fire*.42)+')';ctx.fill();ctx.restore()}
  for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];s.t+=s.v*dt;const head=Math.min(1,s.t);for(let tail=6;tail>=0;tail--){const u=Math.max(0,head-tail*.014),p=bez(a,b,e.k,u),alpha=(1-tail/7)*.88;ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=tail===0?12:4;ctx.beginPath();ctx.arc(p.x,p.y,tail===0?2.35:1.2,0,6.283);ctx.fillStyle='rgba(0,235,180,'+alpha+')';ctx.fill();ctx.restore()}
    if(s.t>=1){N[s.to].fire=1;const arrived=s.to,prev=s.from;if(N[arrived].virtual){const ti=N[arrived].target;if(focus===ti)targets[ti].el.animate([{boxShadow:'0 18px 45px rgba(0,169,132,.10)'},{boxShadow:'0 0 0 1px rgba(0,235,180,.35),0 20px 55px rgba(0,169,132,.20)'},{boxShadow:'0 18px 45px rgba(0,169,132,.10)'}],{duration:520});S.splice(i,1);continue}
-     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0?.00072:.00046}else S.splice(i,1)}
+     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0 ? .00072 : .00046}else S.splice(i,1)}
  }
  if(S.length<18&&Math.random()<.025)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
  raf=requestAnimationFrame(draw);
