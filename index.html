@@ -29,7 +29,7 @@
 .node[href="./research.html"]:hover{box-shadow:0 18px 52px rgba(8,125,165,.14)}
 
 .node.receiving{border-color:rgba(0,220,170,.72);box-shadow:0 0 0 1px rgba(0,220,170,.12),0 22px 60px rgba(0,169,132,.18)}
-</style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
+.node.receiving{border-color:rgba(0,220,170,.55)!important;box-shadow:0 18px 55px rgba(0,169,132,.16)!important}</style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
 <a class="node" href="./tools.html"><div class="k">РАЗДЕЛ</div><b>Инструменты</b><small>Расчётные и аналитические инструменты для проверки и повышения эффективности проекта.</small></a>
 <a class="node" href="./research.html"><div class="k">ИССЛЕДОВАНИЯ</div><b>База исследований</b><small>Проверенные научные работы, данные и практические выводы для проектировщика.</small></a>
 <a class="node" href="#"><div class="k">РЕШЕНИЯ</div><b>Инженерные решения</b><small>Собирать и сравнивать решения, повышающие эффективность проекта.</small></a>
@@ -37,34 +37,37 @@
 <section class="center"><a class="kep" href="calculator.html" aria-label="Открыть калькулятор КЭП" style="text-decoration:none;color:inherit"><div><div class="big" style="font-size:clamp(17px,1.7vw,27px);letter-spacing:.12em;margin-bottom:7px">КЭП</div><h1 style="font-size:clamp(25px,2.7vw,43px);line-height:1.02;max-width:78%;margin:0 auto 13px;overflow-wrap:normal">Эффективность<br>планировок</h1><p style="max-width:72%;margin-left:auto;margin-right:auto">Связываем планировку, площадь, себестоимость и качество проектного решения.</p><span style="margin-top:18px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:11px;font-weight:850">Проверить сколько можно сэкономить →</span></div></a></section>
 <section class="side right"><a class="node" href="#"><div class="k">АУДИТ</div><b>Проверить проект</b><small>Найти резервы КЭП, планировки, конструктивных решений и себестоимости.</small></a><a class="node" href="#"><div class="k">ОПТИМИЗАЦИЯ</div><b>Разобрать решение</b><small>Определить уровень вмешательства и потенциал улучшения.</small></a></section></main><footer class="foot"><div><span class="live">● LIVE</span> ПРОЕКТСЕТЬ · инструменты ↔ исследования ↔ практика ↔ аудит</div><div>2026</div></footer></div>
 <script>
-const c=document.getElementById('net'),x=c.getContext('2d'),hero=document.querySelector('.kep');let HN=[],focusCard=null,focusStart=0;let W,H,d=1,N=[],E=[],S=[],raf=0,lastHero=0;
-function reset(){
- d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
- const count=Math.max(40,Math.min(72,Math.round(W*H/23500)));N=[];
- for(let i=0;i<count;i++)N.push({bx:Math.random()*W,by:Math.random()*H,ph:Math.random()*6.283,ax:1+Math.random()*3,ay:1+Math.random()*3,r:1.7+Math.random()*1.5,flash:0});
- E=[];
- for(let i=0;i<N.length;i++){const near=N.map((n,j)=>({j,q:j===i?1e9:Math.hypot(N[i].bx-n.bx,N[i].by-n.by)})).sort((a,b)=>a.q-b.q).slice(0,2+(Math.random()<.34?1:0));for(const z of near){if(z.q>225)continue;const a=Math.min(i,z.j),b=Math.max(i,z.j);if(!E.some(e=>e.a===a&&e.b===b))E.push({a,b,curve:(Math.random()-.5)*30})}}
- S=Array.from({length:Math.max(14,Math.round(E.length*.20))},()=>({e:Math.floor(Math.random()*E.length),t:Math.random(),v:.0012+Math.random()*.0028,r:1.9+Math.random()*1.35}));
- const cx=W*.5,cy=H*.5;HN=N.map((n,i)=>({i,q:Math.hypot(n.bx-cx,n.by-cy)})).sort((a,b)=>a.q-b.q).slice(0,Math.min(7,N.length)).map(o=>o.i);
+const cv=document.getElementById('net'),ctx=cv.getContext('2d'),hero=document.querySelector('.kep');
+let W,H,D=1,N=[],E=[],Q=[],raf=0,focusCard=null,last=0;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function build(){
+ D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);
+ N=[];E=[];Q=[];
+ const clusters=[
+  {x:.16,y:.27,n:9,s:105},{x:.18,y:.70,n:10,s:120},{x:.50,y:.20,n:8,s:110},
+  {x:.50,y:.78,n:8,s:110},{x:.83,y:.28,n:9,s:110},{x:.82,y:.70,n:10,s:120}
+ ];
+ for(const C of clusters)for(let i=0;i<C.n;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*C.s;N.push({x:C.x*W+Math.cos(a)*r,y:C.y*H+Math.sin(a)*r,r:rnd(2.1,3.8),ph:rnd(0,6.28),fire:0})}
+ for(let i=0;i<N.length;i++){let ds=N.map((n,j)=>({j,d:j===i?1e9:Math.hypot(N[i].x-n.x,N[i].y-n.y)})).sort((a,b)=>a.d-b.d);for(const z of ds.slice(0,2+(Math.random()<.28?1:0))){if(z.d>185)continue;let a=Math.min(i,z.j),b=Math.max(i,z.j);if(!E.some(e=>e.a===a&&e.b===b))E.push({a,b,k:rnd(-24,24)})}}
+ // sparse bridges between clusters create a brain-like web, not a uniform mesh
+ for(let i=0;i<N.length;i++){let far=N.map((n,j)=>({j,d:Math.hypot(N[i].x-n.x,N[i].y-n.y)})).filter(o=>o.d>150&&o.d<330);if(far.length&&Math.random()<.12){let z=far[Math.floor(Math.random()*far.length)],a=Math.min(i,z.j),b=Math.max(i,z.j);if(!E.some(e=>e.a===a&&e.b===b))E.push({a,b,k:rnd(-38,38)})}}
+ for(let i=0;i<9;i++)spawn(Math.floor(Math.random()*N.length),false);
 }
-function geom(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
-function nextEdge(node){const choices=[];for(let i=0;i<E.length;i++)if(E[i].a===node||E[i].b===node)choices.push(i);return choices.length?choices[Math.floor(Math.random()*choices.length)]:Math.floor(Math.random()*E.length)}
-document.querySelectorAll('.node').forEach(card=>{card.addEventListener('mouseenter',()=>{focusCard=card;focusStart=performance.now();card.classList.add('receiving')});card.addEventListener('mouseleave',()=>{card.classList.remove('receiving');focusCard=null})});
+function edgesOf(n){return E.map((e,i)=>({e,i,to:e.a===n?e.b:e.b===n?e.a})).filter(o=>o.e.a===n||o.e.b===n)}
+function targetPoint(){if(!focusCard)return null;const r=focusCard.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}}
+function choose(n){let es=edgesOf(n);if(!es.length)return null;const t=targetPoint();if(t){es.sort((a,b)=>Math.hypot(N[a.to].x-t.x,N[a.to].y-t.y)-Math.hypot(N[b.to].x-t.x,N[b.to].y-t.y));return Math.random()<.9?es[0]:es[Math.floor(Math.random()*es.length)]}return es[Math.floor(Math.random()*es.length)]}
+function spawn(n,focused=true){const z=choose(n);if(!z)return;Q.push({from:n,to:z.to,e:z.i,t:0,v:focused?.0010:.00072,life:0})}
+function curve(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
+document.querySelectorAll('.node').forEach(card=>{card.addEventListener('mouseenter',()=>{focusCard=card;const t=targetPoint();let seeds=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,4);seeds.forEach((s,k)=>setTimeout(()=>{N[s.i].fire=1;spawn(s.i,true)},k*180));card.classList.add('receiving')});card.addEventListener('mouseleave',()=>{focusCard=null;card.classList.remove('receiving')})});
 function draw(ms){
- x.clearRect(0,0,W,H);const t=ms*.001,P=N.map(n=>({x:n.bx+Math.sin(t*.24+n.ph)*n.ax,y:n.by+Math.cos(t*.20+n.ph)*n.ay}));
- for(const e of E){const a=P[e.a],b=P[e.b],g=geom(a,b,e.curve,.5);x.beginPath();x.moveTo(a.x,a.y);x.quadraticCurveTo(g.cx,g.cy,b.x,b.y);x.strokeStyle='rgba(16,121,154,.18)';x.lineWidth=1.15;x.stroke()}
- const rect=hero.getBoundingClientRect(),hx=rect.left+rect.width/2,hy=rect.top+rect.height/2,hr=rect.width*.48;
- for(const i of HN){const a=P[i],ang=Math.atan2(a.y-hy,a.x-hx),tx=hx+Math.cos(ang)*hr,ty=hy+Math.sin(ang)*hr;x.beginPath();x.moveTo(a.x,a.y);const mx=(a.x+tx)/2+(hy-a.y)*.035,my=(a.y+ty)/2-(hx-a.x)*.035;x.quadraticCurveTo(mx,my,tx,ty);x.strokeStyle='rgba(0,169,132,.13)';x.lineWidth=1.1;x.stroke()}
- if(focusCard){
- const r=focusCard.getBoundingClientRect(),tx=r.left+r.width/2,ty=r.top+r.height/2,elapsed=ms-focusStart;
- const target=N.map((n,i)=>({i,q:Math.hypot(P[i].x-tx,P[i].y-ty)})).sort((a,b)=>a.q-b.q)[0].i;
- for(let k=0;k<S.length;k++){const s=S[k];s.v=Math.min(s.v,.00145);const e=E[s.e],a=P[e.a],b=P[e.b];}
- if((elapsed%900)<24)focusCard.animate([{boxShadow:'0 18px 52px rgba(0,169,132,.13)'},{boxShadow:'0 0 0 1px rgba(0,255,194,.28),0 20px 56px rgba(0,169,132,.20)'},{boxShadow:'0 18px 52px rgba(0,169,132,.13)'}],{duration:650,easing:'ease-out'});
-}
-for(let i=0;i<P.length;i++){const p=P[i],n=N[i];n.flash*=.94;const rr=n.r+n.flash*2.5;x.save();x.shadowColor='rgba(0,232,176,'+(.25+n.flash*.65)+')';x.shadowBlur=5+n.flash*13;x.beginPath();x.arc(p.x,p.y,rr,0,6.283);x.fillStyle='rgba(0,220,166,'+(.82+n.flash*.18)+')';x.fill();x.restore()}
- for(const s of S){s.t+=s.v;if(s.t>1){const old=E[s.e],arrival=old.b;N[arrival].flash=1;s.e=nextEdge(arrival);const ne=E[s.e];if(ne.a!==arrival&&ne.b===arrival){const tmp=ne.a;ne.a=ne.b;ne.b=tmp} s.t=0;s.v=focusCard?(.00055+Math.random()*.0007):(.0012+Math.random()*.0028);if(ms-lastHero>1200&&Math.random()<.16){hero.classList.add('signal');setTimeout(()=>hero.classList.remove('signal'),380);lastHero=ms}}
- const e=E[s.e],a=P[e.a],b=P[e.b];for(let z=4;z>=0;z--){const u=Math.max(0,s.t-z*.014),q=geom(a,b,e.curve,u),al=(1-z/5)*.95;x.save();x.shadowColor='rgba(0,255,194,.95)';x.shadowBlur=z===0?12:4;x.beginPath();x.arc(q.x,q.y,z===0?s.r:Math.max(.55,s.r*(1-z/5.8)),0,6.283);x.fillStyle='rgba(0,255,194,'+al+')';x.fill();x.restore()}}
+ const dt=Math.min(32,ms-last||16);last=ms;ctx.clearRect(0,0,W,H);
+ const P=N.map(n=>({x:n.x+Math.sin(ms*.00022+n.ph)*2.2,y:n.y+Math.cos(ms*.00018+n.ph)*2.2}));
+ for(const e of E){const a=P[e.a],b=P[e.b],g=curve(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);ctx.strokeStyle='rgba(8,125,165,.13)';ctx.lineWidth=1;ctx.stroke()}
+ // short dendrites around each neuron
+ for(let i=0;i<P.length;i++){const p=P[i],n=N[i];n.fire*=.955;for(let j=0;j<3;j++){let a=n.ph+j*2.09+Math.sin(ms*.00015+n.ph)*.08,L=7+j*2;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+Math.cos(a)*L,p.y+Math.sin(a)*L);ctx.strokeStyle='rgba(0,169,132,.16)';ctx.lineWidth=.8;ctx.stroke()}ctx.save();ctx.shadowColor='rgba(0,235,177,'+(.22+n.fire*.7)+')';ctx.shadowBlur=5+n.fire*14;ctx.beginPath();ctx.arc(p.x,p.y,n.r+n.fire*1.8,0,6.283);ctx.fillStyle='rgba(0,218,164,'+(.78+n.fire*.22)+')';ctx.fill();ctx.restore()}
+ for(let qi=Q.length-1;qi>=0;qi--){const q=Q[qi],e=E[q.e],a=P[q.from],b=P[q.to];q.t+=q.v*dt;q.life+=dt;const head=Math.min(1,q.t);for(let z=5;z>=0;z--){const u=Math.max(0,head-z*.018),p=curve(a,b,e.k,u),al=(1-z/6)*.9;ctx.save();ctx.shadowColor='rgba(0,255,194,.9)';ctx.shadowBlur=z===0?10:3;ctx.beginPath();ctx.arc(p.x,p.y,z===0?2.2:1.25,0,6.283);ctx.fillStyle='rgba(0,255,194,'+al+')';ctx.fill();ctx.restore()}if(q.t>=1){N[q.to].fire=1;const arrived=q.to;Q.splice(qi,1);if(focusCard||Math.random()<.72)spawn(arrived,!!focusCard)}}
+ if(!focusCard&&Q.length<7&&Math.random()<.012)spawn(Math.floor(Math.random()*N.length),false);
  raf=requestAnimationFrame(draw)
 }
-addEventListener('resize',()=>{cancelAnimationFrame(raf);reset();raf=requestAnimationFrame(draw)});reset();raf=requestAnimationFrame(draw);
+addEventListener('resize',()=>{cancelAnimationFrame(raf);build();raf=requestAnimationFrame(draw)});build();raf=requestAnimationFrame(draw);
 </script></body></html>
