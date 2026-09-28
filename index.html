@@ -86,12 +86,13 @@ function bind(){
 }
 function draw(ms){
  const dt=Math.min(34,ms-last||16);last=ms;ctx.clearRect(0,0,W,H);
- const P=N.map((_,i)=>pos(i,ms));
- for(const e of E){e.heat*=.982;const a=P[e.a],b=P[e.b],g=bez(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);let active=false;if(focus>=0){const da=distToTarget(e.a,focus),db=distToTarget(e.b,focus);active=Math.abs(da-db)>8&&Math.min(da,db)<420}
+ const P=N.map((_,i)=>pos(i,ms));const G=E.map(e=>{const a=P[e.a],b=P[e.b],m=bez(a,b,e.k,.5);return{a,b,cx:m.cx,cy:m.cy}});
+ for(let ei=0;ei<E.length;ei++){const e=E[ei],g=G[ei],a=g.a,b=g.b;e.heat*=.982;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);let active=false;if(focus>=0){const da=distToTarget(e.a,focus),db=distToTarget(e.b,focus);active=Math.abs(da-db)>8&&Math.min(da,db)<420}
  ctx.strokeStyle=e.type?(focus>=0?'rgba(0,185,145,.46)':'rgba(0,169,132,.34)'):(focus>=0?(active?'rgba(0,169,132,.28)':'rgba(8,125,165,.095)'):'rgba(8,125,165,.17)');
  ctx.lineWidth=e.type?1.45:(active?1.18:.9);ctx.stroke()}
  for(let i=0;i<N.length;i++){const n=N[i];if(n.virtual)continue;n.fire*=.95;const p=P[i];ctx.save();ctx.shadowColor='rgba(0,220,170,.75)';ctx.shadowBlur=4+n.fire*13;ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?2.45:1.65)+n.fire*1.7,0,Math.PI*2);ctx.fillStyle=n.hub?'rgba(0,169,132,'+(.72+n.fire*.25)+')':'rgba(0,169,132,'+(.44+n.fire*.42)+')';ctx.fill();ctx.restore()}
- for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];e.heat=Math.min(1,e.heat+.04);s.t+=s.v*dt;const head=Math.min(1,s.t),tail=Math.max(0,head-.065);ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=8;ctx.lineCap='round';ctx.lineWidth=2;ctx.beginPath();for(let q=0;q<=8;q++){const u=tail+(head-tail)*q/8,p=bez(a,b,e.k,u);if(q===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}ctx.strokeStyle='rgba(0,235,180,.78)';ctx.stroke();const p=bez(a,b,e.k,head);ctx.beginPath();ctx.arc(p.x,p.y,2.1,0,6.283);ctx.fillStyle='rgba(225,255,248,.98)';ctx.fill();ctx.restore()
+ function edgePoint(g,u){const s=1-u;return{x:s*s*g.a.x+2*s*u*g.cx+u*u*g.b.x,y:s*s*g.a.y+2*s*u*g.cy+u*u*g.b.y}}
+ for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],g=G[s.e];e.heat=Math.min(1,e.heat+.04);s.t+=s.v*dt;const head=Math.min(1,s.t),tail=Math.max(0,head-.065);ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=8;ctx.lineCap='round';ctx.lineWidth=2;ctx.beginPath();for(let q=0;q<=8;q++){const u=tail+(head-tail)*q/8,p=edgePoint(g,u);if(q===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}ctx.strokeStyle='rgba(0,235,180,.78)';ctx.stroke();const p=edgePoint(g,head);ctx.beginPath();ctx.arc(p.x,p.y,2.1,0,6.283);ctx.fillStyle='rgba(225,255,248,.98)';ctx.fill();ctx.restore()
    if(s.t>=1){N[s.to].fire=1;const arrived=s.to,prev=s.from;if(N[arrived].virtual){const ti=N[arrived].target;if(focus===ti)targets[ti].el.animate([{boxShadow:'0 18px 45px rgba(0,169,132,.10)'},{boxShadow:'0 0 0 1px rgba(0,235,180,.35),0 20px 55px rgba(0,169,132,.20)'},{boxShadow:'0 18px 45px rgba(0,169,132,.10)'}],{duration:520});S.splice(i,1);continue}
      const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0 ? .00072 : .00046}else S.splice(i,1)}
  }
