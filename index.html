@@ -38,7 +38,7 @@
 <section class="side right"><a class="node" href="#"><div class="k">АУДИТ</div><b>Проверить проект</b><small>Найти резервы КЭП, планировки, конструктивных решений и себестоимости.</small></a><a class="node" href="#"><div class="k">ОПТИМИЗАЦИЯ</div><b>Разобрать решение</b><small>Определить уровень вмешательства и потенциал улучшения.</small></a></section></main><footer class="foot"><div><span class="live">● LIVE</span> ПРОЕКТСЕТЬ · инструменты ↔ исследования ↔ практика ↔ аудит</div><div>2026</div></footer></div>
 <script>
 const cv=document.getElementById('net'),ctx=cv.getContext('2d');
-let W=0,H=0,D=1,N=[],E=[],S=[],targets=[],focus=-1,last=0,raf=0;
+let W=0,H=0,D=1,N=[],E=[],S=[],targets=[],focus=-1,last=0,raf=0,mouse={x:-9999,y:-9999,active:false};
 const R=(a,b)=>a+Math.random()*(b-a);
 function resize(){
  D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(D,0,0,D,0,0);build();
@@ -51,14 +51,14 @@ function build(){
  for(let y=58;y<H-42;y+=step)for(let x=42;x<W-32;x+=step){
    let px=x+R(-30,30),py=y+R(-28,28);if(!insideCard(px,py,22))N.push({x:px,y:py,ph:R(0,6.28),fire:0,hub:0});
  }
- function add(a,b,type=0){if(a===b||E.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a)))return;E.push({a,b,type,k:R(-22,22)})}
+ function add(a,b,type=0){if(a===b||E.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a)))return;E.push({a,b,type,k:R(-22,22),heat:0})}
  for(let i=0;i<N.length;i++){
    const near=N.map((n,j)=>({j,d:j===i?1e9:Math.hypot(N[i].x-n.x,N[i].y-n.y)})).sort((a,b)=>a.d-b.d);
    near.slice(0,2+(Math.random()<.38?1:0)).forEach(z=>{if(z.d<step*1.9)add(i,z.j)});
  }
  // Card ports are virtual graph nodes; links terminate at card edges.
  targets.forEach((t,ti)=>{
-   const cand=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,5);
+   const cand=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,t.el.classList.contains('kep')?9:5);
    cand.forEach(z=>{const vi=N.length;N.push({x:t.x,y:t.y,ph:0,fire:0,virtual:true,target:ti,source:z.i});add(z.i,vi,1);t.links.push(vi)});
  });
  for(let i=0;i<N.length;i++)N[i].hub=adj(i).length>=4?1:0;
@@ -74,21 +74,28 @@ function next(i,prev=-1){
 }
 function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused ? .00072 : .00046,prev:-1})}
 function bez(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
+function exciteMouse(){
+ if(!mouse.active)return;
+ const firstVirtual=N.findIndex(n=>n.virtual),lim=firstVirtual<0?N.length:firstVirtual;
+ N.slice(0,lim).map((n,i)=>({i,d:Math.hypot(n.x-mouse.x,n.y-mouse.y)})).filter(o=>o.d<115).sort((a,b)=>a.d-b.d).slice(0,5).forEach(o=>{N[o.i].fire=Math.max(N[o.i].fire,.48*(1-o.d/130))});
+}
+addEventListener('pointermove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;mouse.active=true;exciteMouse()},{passive:true});
+addEventListener('pointerleave',()=>{mouse.active=false});
 function bind(){
- targets.forEach((t,i)=>{t.el.addEventListener('mouseenter',()=>{focus=i;t.el.classList.add('receiving');for(let q=0;q<7;q++)setTimeout(()=>spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),true),q*130)});t.el.addEventListener('mouseleave',()=>{if(focus===i)focus=-1;t.el.classList.remove('receiving')})});
+ targets.forEach((t,i)=>{t.el.addEventListener('mouseenter',()=>{focus=i;t.el.classList.add('receiving');if(mouse.active){const real=N.map((n,j)=>({n,j})).filter(o=>!o.n.virtual).map(o=>({j:o.j,d:Math.hypot(o.n.x-mouse.x,o.n.y-mouse.y)})).sort((a,b)=>a.d-b.d).slice(0,3);real.forEach((o,k)=>setTimeout(()=>{if(focus===i)spawn(o.j,true)},k*150))}for(let q=0;q<7;q++)setTimeout(()=>spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),true),q*130)});t.el.addEventListener('mouseleave',()=>{if(focus===i)focus=-1;t.el.classList.remove('receiving')})});
 }
 function draw(ms){
  const dt=Math.min(34,ms-last||16);last=ms;ctx.clearRect(0,0,W,H);
  const P=N.map((_,i)=>pos(i,ms));
- for(const e of E){const a=P[e.a],b=P[e.b],g=bez(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);let active=false;if(focus>=0){const da=distToTarget(e.a,focus),db=distToTarget(e.b,focus);active=Math.abs(da-db)>8&&Math.min(da,db)<420}
+ for(const e of E){e.heat*=.982;const a=P[e.a],b=P[e.b],g=bez(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);let active=false;if(focus>=0){const da=distToTarget(e.a,focus),db=distToTarget(e.b,focus);active=Math.abs(da-db)>8&&Math.min(da,db)<420}
  ctx.strokeStyle=e.type?(focus>=0?'rgba(0,185,145,.46)':'rgba(0,169,132,.34)'):(focus>=0?(active?'rgba(0,169,132,.28)':'rgba(8,125,165,.095)'):'rgba(8,125,165,.17)');
  ctx.lineWidth=e.type?1.45:(active?1.18:.9);ctx.stroke()}
  for(let i=0;i<N.length;i++){const n=N[i];if(n.virtual)continue;n.fire*=.95;const p=P[i];ctx.save();ctx.shadowColor='rgba(0,220,170,.75)';ctx.shadowBlur=4+n.fire*13;ctx.beginPath();ctx.arc(p.x,p.y,(n.hub?2.45:1.65)+n.fire*1.7,0,Math.PI*2);ctx.fillStyle=n.hub?'rgba(0,169,132,'+(.72+n.fire*.25)+')':'rgba(0,169,132,'+(.44+n.fire*.42)+')';ctx.fill();ctx.restore()}
- for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];s.t+=s.v*dt;const head=Math.min(1,s.t);for(let tail=6;tail>=0;tail--){const u=Math.max(0,head-tail*.014),p=bez(a,b,e.k,u),alpha=(1-tail/7)*.88;ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=tail===0?12:4;ctx.beginPath();ctx.arc(p.x,p.y,tail===0?2.35:1.2,0,6.283);ctx.fillStyle='rgba(0,235,180,'+alpha+')';ctx.fill();ctx.restore()}
+ for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];e.heat=Math.min(1,e.heat+.04);s.t+=s.v*dt;const head=Math.min(1,s.t),tail=Math.max(0,head-.065);ctx.save();ctx.shadowColor='rgba(0,255,194,.92)';ctx.shadowBlur=8;ctx.lineCap='round';ctx.lineWidth=2;ctx.beginPath();for(let q=0;q<=8;q++){const u=tail+(head-tail)*q/8,p=bez(a,b,e.k,u);if(q===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}ctx.strokeStyle='rgba(0,235,180,.78)';ctx.stroke();const p=bez(a,b,e.k,head);ctx.beginPath();ctx.arc(p.x,p.y,2.1,0,6.283);ctx.fillStyle='rgba(225,255,248,.98)';ctx.fill();ctx.restore()
    if(s.t>=1){N[s.to].fire=1;const arrived=s.to,prev=s.from;if(N[arrived].virtual){const ti=N[arrived].target;if(focus===ti)targets[ti].el.animate([{boxShadow:'0 18px 45px rgba(0,169,132,.10)'},{boxShadow:'0 0 0 1px rgba(0,235,180,.35),0 20px 55px rgba(0,169,132,.20)'},{boxShadow:'0 18px 45px rgba(0,169,132,.10)'}],{duration:520});S.splice(i,1);continue}
      const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0 ? .00072 : .00046}else S.splice(i,1)}
  }
- if(S.length<18&&Math.random()<.025)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
+ if(mouse.active&&Math.random()<.04)exciteMouse();if(S.length<18&&Math.random()<.025)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
  raf=requestAnimationFrame(draw);
 }
 addEventListener('resize',()=>{cancelAnimationFrame(raf);resize()});resize();bind();raf=requestAnimationFrame(draw);
