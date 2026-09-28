@@ -37,24 +37,56 @@
 <section class="center"><a class="kep" href="calculator.html" aria-label="Открыть калькулятор КЭП" style="text-decoration:none;color:inherit"><div><div class="big" style="font-size:clamp(17px,1.7vw,27px);letter-spacing:.12em;margin-bottom:7px">КЭП</div><h1 style="font-size:clamp(25px,2.7vw,43px);line-height:1.02;max-width:78%;margin:0 auto 13px;overflow-wrap:normal">Эффективность<br>планировок</h1><p style="max-width:72%;margin-left:auto;margin-right:auto">Связываем планировку, площадь, себестоимость и качество проектного решения.</p><span style="margin-top:18px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:11px;font-weight:850">Проверить сколько можно сэкономить →</span></div></a></section>
 <section class="side right"><a class="node" href="#"><div class="k">АУДИТ</div><b>Проверить проект</b><small>Найти резервы КЭП, планировки, конструктивных решений и себестоимости.</small></a><a class="node" href="#"><div class="k">ОПТИМИЗАЦИЯ</div><b>Разобрать решение</b><small>Определить уровень вмешательства и потенциал улучшения.</small></a></section></main><footer class="foot"><div><span class="live">● LIVE</span> ПРОЕКТСЕТЬ · инструменты ↔ исследования ↔ практика ↔ аудит</div><div>2026</div></footer></div>
 <script>
-const c=document.getElementById('net'),x=c.getContext('2d'),hero=document.querySelector('.kep');let W,H,d=1,N=[],E=[],S=[],raf=0,lastHero=0;
-function reset(){
- d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
- const count=Math.max(40,Math.min(72,Math.round(W*H/23500)));N=[];
- for(let i=0;i<count;i++)N.push({bx:Math.random()*W,by:Math.random()*H,ph:Math.random()*6.283,ax:1+Math.random()*3,ay:1+Math.random()*3,r:1.7+Math.random()*1.5,flash:0});
- E=[];
- for(let i=0;i<N.length;i++){const near=N.map((n,j)=>({j,q:j===i?1e9:Math.hypot(N[i].bx-n.bx,N[i].by-n.by)})).sort((a,b)=>a.q-b.q).slice(0,2+(Math.random()<.34?1:0));for(const z of near){if(z.q>225)continue;const a=Math.min(i,z.j),b=Math.max(i,z.j);if(!E.some(e=>e.a===a&&e.b===b))E.push({a,b,curve:(Math.random()-.5)*30})}}
- S=Array.from({length:Math.max(14,Math.round(E.length*.20))},()=>({e:Math.floor(Math.random()*E.length),t:Math.random(),v:.0012+Math.random()*.0028,r:1.9+Math.random()*1.35}));
+const cv=document.getElementById('net'),ctx=cv.getContext('2d');
+let W=0,H=0,D=1,N=[],E=[],S=[],targets=[],focus=-1,last=0,raf=0;
+const R=(a,b)=>a+Math.random()*(b-a);
+function resize(){
+ D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(D,0,0,D,0,0);build();
 }
-function geom(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
-function nextEdge(node){const choices=[];for(let i=0;i<E.length;i++)if(E[i].a===node||E[i].b===node)choices.push(i);return choices.length?choices[Math.floor(Math.random()*choices.length)]:Math.floor(Math.random()*E.length)}
+function insideCard(x,y,pad=12){return targets.some(t=>x>t.l-pad&&x<t.r+pad&&y>t.t-pad&&y<t.b+pad)}
+function build(){
+ targets=[...document.querySelectorAll('.node,.kep')].map((el,id)=>{const r=el.getBoundingClientRect();return{el,id,l:r.left,r:r.right,t:r.top,b:r.bottom,x:r.left+r.width/2,y:r.top+r.height/2,links:[]}});
+ N=[];E=[];S=[];
+ const step=Math.max(78,Math.min(108,W/15));
+ for(let y=58;y<H-42;y+=step)for(let x=42;x<W-32;x+=step){
+   let px=x+R(-30,30),py=y+R(-28,28);if(!insideCard(px,py,22))N.push({x:px,y:py,ph:R(0,6.28),fire:0});
+ }
+ function add(a,b,type=0){if(a===b||E.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a)))return;E.push({a,b,type,k:R(-22,22)})}
+ for(let i=0;i<N.length;i++){
+   const near=N.map((n,j)=>({j,d:j===i?1e9:Math.hypot(N[i].x-n.x,N[i].y-n.y)})).sort((a,b)=>a.d-b.d);
+   near.slice(0,3).forEach(z=>{if(z.d<step*1.75)add(i,z.j)});
+ }
+ // Card ports are virtual graph nodes; links terminate at card edges.
+ targets.forEach((t,ti)=>{
+   const cand=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,5);
+   cand.forEach(z=>{const vi=N.length;N.push({x:t.x,y:t.y,ph:0,fire:0,virtual:true,target:ti,source:z.i});add(z.i,vi,1);t.links.push(vi)});
+ });
+ for(let i=0;i<18;i++)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
+}
+function pos(i,ms){const n=N[i];if(n.virtual){const t=targets[n.target],src=N[n.source],dx=t.x-src.x,dy=t.y-src.y,L=Math.hypot(dx,dy)||1;let ex=t.x,ey=t.y;const rx=(t.r-t.l)/2,ry=(t.b-t.t)/2,q=1/Math.max(Math.abs(dx)/(rx||1),Math.abs(dy)/(ry||1));ex=t.x-dx*q;ey=t.y-dy*q;return{x:ex,y:ey}}return{x:n.x+Math.sin(ms*.00018+n.ph)*2,y:n.y+Math.cos(ms*.00015+n.ph)*2}}
+function adj(i){const a=[];for(let k=0;k<E.length;k++){const e=E[k];if(e.a===i)a.push({e:k,to:e.b});else if(e.b===i)a.push({e:k,to:e.a})}return a}
+function distToTarget(i,ti){const n=N[i],t=targets[ti];return Math.hypot(n.x-t.x,n.y-t.y)}
+function next(i,prev=-1){
+ let a=adj(i).filter(z=>z.to!==prev);if(!a.length)a=adj(i);if(!a.length)return null;
+ if(focus>=0){a.sort((u,v)=>distToTarget(u.to,focus)-distToTarget(v.to,focus));return Math.random()<.88?a[0]:a[Math.floor(Math.random()*Math.min(3,a.length))]}
+ return a[Math.floor(Math.random()*a.length)];
+}
+function spawn(i,focused){const z=next(i);if(!z)return;S.push({from:i,to:z.to,e:z.e,t:R(0,.7),v:focused?.00072:.00046,prev:-1})}
+function bez(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
+function bind(){
+ targets.forEach((t,i)=>{t.el.addEventListener('mouseenter',()=>{focus=i;t.el.classList.add('receiving');for(let q=0;q<7;q++)setTimeout(()=>spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),true),q*130)});t.el.addEventListener('mouseleave',()=>{if(focus===i)focus=-1;t.el.classList.remove('receiving')})});
+}
 function draw(ms){
- x.clearRect(0,0,W,H);const t=ms*.001,P=N.map(n=>({x:n.bx+Math.sin(t*.24+n.ph)*n.ax,y:n.by+Math.cos(t*.20+n.ph)*n.ay}));
- for(const e of E){const a=P[e.a],b=P[e.b],g=geom(a,b,e.curve,.5);x.beginPath();x.moveTo(a.x,a.y);x.quadraticCurveTo(g.cx,g.cy,b.x,b.y);x.strokeStyle='rgba(16,121,154,.18)';x.lineWidth=1.15;x.stroke()}
- for(let i=0;i<P.length;i++){const p=P[i],n=N[i];n.flash*=.94;const rr=n.r+n.flash*2.5;x.save();x.shadowColor='rgba(0,232,176,'+(.25+n.flash*.65)+')';x.shadowBlur=5+n.flash*13;x.beginPath();x.arc(p.x,p.y,rr,0,6.283);x.fillStyle='rgba(0,220,166,'+(.82+n.flash*.18)+')';x.fill();x.restore()}
- for(const s of S){s.t+=s.v;if(s.t>1){const old=E[s.e],arrival=old.b;N[arrival].flash=1;s.e=nextEdge(arrival);const ne=E[s.e];if(ne.a!==arrival&&ne.b===arrival){const tmp=ne.a;ne.a=ne.b;ne.b=tmp} s.t=0;s.v=.0012+Math.random()*.0028;if(ms-lastHero>1200&&Math.random()<.16){hero.classList.add('signal');setTimeout(()=>hero.classList.remove('signal'),380);lastHero=ms}}
- const e=E[s.e],a=P[e.a],b=P[e.b];for(let z=4;z>=0;z--){const u=Math.max(0,s.t-z*.014),q=geom(a,b,e.curve,u),al=(1-z/5)*.95;x.save();x.shadowColor='rgba(0,255,194,.95)';x.shadowBlur=z===0?12:4;x.beginPath();x.arc(q.x,q.y,z===0?s.r:Math.max(.55,s.r*(1-z/5.8)),0,6.283);x.fillStyle='rgba(0,255,194,'+al+')';x.fill();x.restore()}}
- raf=requestAnimationFrame(draw)
+ const dt=Math.min(34,ms-last||16);last=ms;ctx.clearRect(0,0,W,H);
+ const P=N.map((_,i)=>pos(i,ms));
+ for(const e of E){const a=P[e.a],b=P[e.b],g=bez(a,b,e.k,.5);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(g.cx,g.cy,b.x,b.y);ctx.strokeStyle=e.type?'rgba(0,169,132,.30)':'rgba(8,125,165,.20)';ctx.lineWidth=e.type?1.25:1;ctx.stroke()}
+ for(let i=0;i<N.length;i++){const n=N[i];if(n.virtual)continue;n.fire*=.95;const p=P[i];ctx.save();ctx.shadowColor='rgba(0,220,170,.75)';ctx.shadowBlur=4+n.fire*13;ctx.beginPath();ctx.arc(p.x,p.y,1.8+n.fire*1.7,0,Math.PI*2);ctx.fillStyle='rgba(0,169,132,'+(.52+n.fire*.42)+')';ctx.fill();ctx.restore()}
+ for(let i=S.length-1;i>=0;i--){const s=S[i],e=E[s.e],a=P[s.from],b=P[s.to];s.t+=s.v*dt;const p=bez(a,b,e.k,Math.min(1,s.t));ctx.save();ctx.shadowColor='rgba(0,255,194,.95)';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,2.2,0,6.283);ctx.fillStyle='rgba(0,235,180,.96)';ctx.fill();ctx.restore();
+   if(s.t>=1){N[s.to].fire=1;const arrived=s.to,prev=s.from;if(N[arrived].virtual){const ti=N[arrived].target;if(focus===ti)targets[ti].el.animate([{boxShadow:'0 18px 45px rgba(0,169,132,.10)'},{boxShadow:'0 0 0 1px rgba(0,235,180,.35),0 20px 55px rgba(0,169,132,.20)'},{boxShadow:'0 18px 45px rgba(0,169,132,.10)'}],{duration:520});S.splice(i,1);continue}
+     const z=next(arrived,prev);if(z){s.prev=prev;s.from=arrived;s.to=z.to;s.e=z.e;s.t=0;s.v=focus>=0?.00072:.00046}else S.splice(i,1)}
+ }
+ if(S.length<18&&Math.random()<.025)spawn(Math.floor(Math.random()*Math.max(1,N.length-targets.length*5)),false);
+ raf=requestAnimationFrame(draw);
 }
-addEventListener('resize',()=>{cancelAnimationFrame(raf);reset();raf=requestAnimationFrame(draw)});reset();raf=requestAnimationFrame(draw);
+addEventListener('resize',()=>{cancelAnimationFrame(raf);resize()});resize();bind();raf=requestAnimationFrame(draw);
 </script></body></html>
