@@ -56,7 +56,7 @@ function build(){
 function edgesOf(n){return E.map((e,i)=>({e,i,to:e.a===n?e.b:e.b===n?e.a})).filter(o=>o.e.a===n||o.e.b===n)}
 function targetPoint(){if(!focusCard)return null;const r=focusCard.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}}
 function choose(n){let es=edgesOf(n);if(!es.length)return null;const t=targetPoint();if(t){es.sort((a,b)=>Math.hypot(N[a.to].x-t.x,N[a.to].y-t.y)-Math.hypot(N[b.to].x-t.x,N[b.to].y-t.y));return Math.random()<.9?es[0]:es[Math.floor(Math.random()*es.length)]}return es[Math.floor(Math.random()*es.length)]}
-function spawn(n,focused=true){const z=choose(n);if(!z)return;Q.push({from:n,to:z.to,e:z.i,t:0,v:focused?.0010:.00072,life:0})}
+function spawn(n,focused=true){const z=choose(n);if(!z)return;Q.push({from:n,to:z.to,e:z.i,t:0,v:focused ? .0010 : .00072,life:0})}
 function curve(a,b,k,u){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,cx=(a.x+b.x)/2-dy/L*k,cy=(a.y+b.y)/2+dx/L*k,s=1-u;return{x:s*s*a.x+2*s*u*cx+u*u*b.x,y:s*s*a.y+2*s*u*cy+u*u*b.y,cx,cy}}
 document.querySelectorAll('.node').forEach(card=>{card.addEventListener('mouseenter',()=>{focusCard=card;const t=targetPoint();let seeds=N.map((n,i)=>({i,d:Math.hypot(n.x-t.x,n.y-t.y)})).sort((a,b)=>a.d-b.d).slice(0,4);seeds.forEach((s,k)=>setTimeout(()=>{N[s.i].fire=1;spawn(s.i,true)},k*180));card.classList.add('receiving')});card.addEventListener('mouseleave',()=>{focusCard=null;card.classList.remove('receiving')})});
 function draw(ms){
