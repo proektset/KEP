@@ -72,7 +72,8 @@
 .auditGroup h2{margin:0 0 4px;font-size:22px}.auditSub{color:#66827b;font-size:12px;margin-bottom:17px}.auditCard{display:block;text-decoration:none;color:#12362f;border:1px solid rgba(8,125,165,.12);background:rgba(255,255,255,.85);border-radius:17px;padding:15px 17px;margin-top:10px;transition:.2s}.auditCard:hover{transform:translateY(-2px);border-color:rgba(0,169,132,.4);box-shadow:0 12px 28px rgba(0,169,132,.08)}.auditCard b{display:block;font-size:14px}.auditCard span{display:block;color:#66827b;font-size:12px;line-height:1.45;margin-top:6px}@media(max-width:850px){.auditGrid{grid-template-columns:1fr!important}.auditActions{grid-template-columns:1fr 1fr}.chooseGrid{grid-template-columns:1fr}#auditPanel{padding:20px 16px!important}}
 </style><script>
 const contactModal=document.getElementById('contactModal'),contactForm=document.getElementById('contactForm'),contactStatus=document.getElementById('contactStatus');
-document.getElementById('openContacts').onclick=()=>contactModal.classList.add('open');\nconst openContactsCard=document.getElementById('openContactsCard');if(openContactsCard)openContactsCard.onclick=()=>contactModal.classList.add('open');
+document.getElementById('openContacts').onclick=()=>contactModal.classList.add('open');
+const openContactsCard=document.getElementById('openContactsCard');if(openContactsCard)openContactsCard.onclick=()=>contactModal.classList.add('open');
 document.getElementById('contactClose').onclick=()=>contactModal.classList.remove('open');
 contactModal.addEventListener('click',e=>{if(e.target===contactModal)contactModal.classList.remove('open')});
 document.getElementById('contactWrite').onclick=()=>{contactForm.classList.toggle('open');if(contactForm.classList.contains('open'))contactForm.querySelector('textarea').focus()};
