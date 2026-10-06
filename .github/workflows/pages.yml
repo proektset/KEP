@@ -23,6 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Prepare current UI
         shell: python
         run: |
@@ -30,24 +31,53 @@ jobs:
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
+
           css = '''<style id="current-ui-fixes">
           .mobileViewBtn{border:1px solid rgba(0,169,132,.38);background:#fff;color:#008f70;border-radius:999px;padding:8px 13px;font:900 10px Inter,Segoe UI,Arial,sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 0 18px rgba(0,210,155,.13)}
-          .kepExplainHot{border:2px solid #00b98d!important;background:linear-gradient(135deg,#e9fff8,#fff)!important;box-shadow:0 0 0 3px rgba(0,185,141,.10),0 0 28px rgba(0,205,155,.28)!important;transform:scale(1.035)}
-          .kepExplainHot b{color:#008d6c!important;font-size:19px!important}.kepExplainHot:after{opacity:1!important;content:'СМОТРЕТЬ ВИДЕО  →'!important}
-          .auditCircle{cursor:pointer!important}
+          .kepExplainHot{border:2px solid #f0b400!important;background:linear-gradient(135deg,#fff7bf,#fff)!important;box-shadow:0 0 0 3px rgba(255,204,0,.14),0 0 30px rgba(255,190,0,.34)!important;transform:scale(1.035)}
+          .kepExplainHot b{color:#9a6900!important;font-size:19px!important}.kepExplainHot:after{opacity:1!important;content:'СМОТРЕТЬ ВИДЕО  →'!important;color:#b77700!important}
+          .page .auditCircle{pointer-events:auto!important;cursor:pointer!important}
+          .auditCircle:focus{outline:3px solid rgba(0,220,160,.35);outline-offset:8px}
           body.forceMobile{overflow:auto!important}body.forceMobile .page{height:auto!important;min-height:100vh;padding:16px!important}body.forceMobile .stage{grid-template-columns:1fr!important;padding:28px 0 58px!important;gap:18px!important}body.forceMobile .left,body.forceMobile .right{justify-items:stretch!important}body.forceMobile .center{order:-1!important}body.forceMobile .auditCircle{width:min(380px,78vw)!important;margin:26px auto!important}body.forceMobile .node{width:100%!important}body.forceMobile .head{gap:12px;align-items:flex-start;flex-wrap:wrap!important}
           @media(max-width:850px){.mobileViewBtn{display:none}.auditCircle{width:min(380px,78vw)!important;margin:28px auto!important}.stage{padding-bottom:58px!important}}
           </style>'''
           s = s.replace('</head>', css + '</head>')
+
           js = '''<script id="current-ui-actions">
           (()=>{
-            const right=document.querySelector('.side.right');
             const kep=[...document.querySelectorAll('.node')].find(x=>x.textContent.includes('Что такое КЭП'));
-            if(kep){kep.classList.add('kepExplainHot');kep.href='./calculator.html?video=1';}
+            if(kep){
+              kep.classList.add('kepExplainHot');
+              kep.setAttribute('href','./calculator.html?video=1');
+            }
+
             const circle=document.querySelector('.auditCircle');
-            if(circle){circle.setAttribute('role','link');circle.setAttribute('tabindex','0');const go=()=>location.href='./calculator.html';circle.addEventListener('click',e=>{if(e.target.closest('button,a'))return;go()});circle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});}
+            if(circle){
+              circle.setAttribute('role','link');
+              circle.setAttribute('tabindex','0');
+              circle.setAttribute('aria-label','Открыть калькулятор КЭП');
+              const go=()=>{ window.location.href='./calculator.html'; };
+              circle.addEventListener('click',e=>{
+                if(e.target.closest('#openProjectSend')) return;
+                go();
+              });
+              circle.addEventListener('keydown',e=>{
+                if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}
+              });
+            }
+
             const head=document.querySelector('.head');
-            if(head){const b=document.createElement('button');b.className='mobileViewBtn';b.type='button';b.textContent='МОБИЛЬНЫЙ ВИД';b.onclick=()=>{document.body.classList.toggle('forceMobile');b.textContent=document.body.classList.contains('forceMobile')?'ОБЫЧНЫЙ ВИД':'МОБИЛЬНЫЙ ВИД'};head.appendChild(b);}
+            if(head && !document.querySelector('.mobileViewBtn')){
+              const b=document.createElement('button');
+              b.className='mobileViewBtn';
+              b.type='button';
+              b.textContent='МОБИЛЬНЫЙ ВИД';
+              b.onclick=()=>{
+                document.body.classList.toggle('forceMobile');
+                b.textContent=document.body.classList.contains('forceMobile')?'ОБЫЧНЫЙ ВИД':'МОБИЛЬНЫЙ ВИД';
+              };
+              head.appendChild(b);
+            }
           })();
           </script>'''
           s = s.replace('</body>', js + '</body>')
@@ -56,17 +86,43 @@ jobs:
 
           p = Path('calculator.html')
           s = p.read_text(encoding='utf-8')
-          css = '''<style id="fixed-button-colors">.btn.instructionHot{background:#ffd84d!important;color:#3d3100!important;border-color:#e4b900!important}.btn.videoHot{background:#d92b32!important;color:#fff!important;border-color:#b71920!important}</style>'''
+
+          css = '''<style id="fixed-button-colors">
+          .btn.instructionHot{background:#ffd84d!important;color:#3d3100!important;border-color:#e4b900!important;box-shadow:0 0 0 2px rgba(255,216,77,.18),0 8px 22px rgba(220,170,0,.20)!important}
+          .btn.videoHot{background:#d92b32!important;color:#fff!important;border-color:#b71920!important;box-shadow:0 0 0 2px rgba(217,43,50,.12),0 8px 22px rgba(190,25,32,.22)!important}
+          </style>'''
           s = s.replace('</head>', css + '</head>')
-          js = '''<script id="open-video-from-home">window.addEventListener('DOMContentLoaded',()=>{if(new URLSearchParams(location.search).get('video')==='1'){const b=document.querySelector('[data-open="videoModal"]');if(b)b.click();}});</script>'''
+
+          js = '''<script id="open-video-from-home">
+          (()=>{
+            if(new URLSearchParams(window.location.search).get('video')==='1'){
+              const openVideo=()=>{
+                const modal=document.getElementById('videoModal');
+                if(modal){
+                  modal.classList.add('open');
+                  const video=modal.querySelector('video');
+                  if(video){ video.currentTime=0; }
+                }
+              };
+              if(document.readyState==='loading'){
+                document.addEventListener('DOMContentLoaded',()=>setTimeout(openVideo,0),{once:true});
+              }else{
+                setTimeout(openVideo,0);
+              }
+            }
+          })();
+          </script>'''
           s = s.replace('</body>', js + '</body>')
           p.write_text(s, encoding='utf-8')
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
           path: "."
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
