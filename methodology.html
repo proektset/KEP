@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ПРОЕКТСЕТЬ — Методология</title>
+<style>
+:root{
+  --bg:#eef6f3;--ink:#17352f;--muted:#627a73;
+  --analytics:#3f72c8;--analytics2:#6f8ed8;
+  --finance:#d59622;--finance2:#efb94f;
+  --technical:#3c8596;--technical2:#6aa8b5;
+  --parameter:#00a984;--parameter2:#59cdb1;
+  --project:#469a67;--project2:#76b989;
+  --control:#c75555;--control2:#da8580;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);
+  background:
+    radial-gradient(circle at 50% -10%,#fff 0,#f6fbf9 38%,var(--bg) 100%);
+}
+.app{height:100dvh;display:grid;grid-template-rows:minmax(158px,24vh) minmax(0,1fr)}
+
+/* frozen top */
+.topbar{
+  position:relative;z-index:20;
+  padding:12px 20px 10px;
+  background:rgba(248,252,250,.94);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(20,80,67,.13);
+  box-shadow:0 8px 28px rgba(30,78,68,.06);
+  overflow:hidden;
+}
+.topline{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(500px,1.8fr);gap:16px;align-items:start}
+.brandline{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.eyebrow{font-size:9px;font-weight:950;letter-spacing:.17em;color:#00896c}
+.thesis{font-size:clamp(17px,2vw,25px);font-weight:950;line-height:1.05;letter-spacing:-.035em;margin:0}
+.thesis-sub{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.35;max-width:510px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.filter{
+  border:1px solid rgba(20,80,67,.12);background:#fff;color:#456159;
+  border-radius:999px;padding:5px 9px;font:800 8px Inter,Segoe UI,Arial,sans-serif;
+  letter-spacing:.05em;cursor:pointer;transition:.18s
+}
+.filter:hover,.filter.active{transform:translateY(-1px);color:#14352f;box-shadow:0 5px 14px rgba(25,75,64,.08)}
+.filter[data-filter="analytics"].active{border-color:var(--analytics);background:#edf3ff}
+.filter[data-filter="finance"].active{border-color:var(--finance);background:#fff5dc}
+.filter[data-filter="technical"].active{border-color:var(--technical);background:#edf8fa}
+.filter[data-filter="parameter"].active{border-color:var(--parameter);background:#e9fbf6}
+.filter[data-filter="project"].active{border-color:var(--project);background:#eef9f1}
+.filter[data-filter="control"].active{border-color:var(--control);background:#fff0ef}
+
+.detail-panel{
+  height:100%;
+  min-height:128px;
+  border:1px solid rgba(20,80,67,.12);
+  border-radius:16px;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 10px 28px rgba(25,75,64,.06);
+  padding:10px 12px;
+  overflow:hidden;
+}
+.detail-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#81938e;font-size:11px}
+.detail-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.detail-title{font-size:15px;font-weight:950}
+.detail-category{font-size:8px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;color:#66827b}
+.detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.detail-item{padding:8px 9px;border-radius:10px;background:#f6faf8;border:1px solid rgba(20,80,67,.08);min-height:70px}
+.detail-item b{display:block;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#00896c;margin-bottom:4px}
+.detail-item span{font-size:9.5px;line-height:1.28;color:#425d56}
+
+/* cards area */
+.board{min-height:0;padding:10px 14px 12px;display:flex}
+.cards{
+  flex:1;min-height:0;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  grid-template-rows:repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+.method-card{
+  --accent:#6f8b83;--accent2:#9ab0aa;--bg1:#fff;--bg2:#f7faf9;
+  position:relative;min-width:0;min-height:0;
+  padding:10px 11px 9px;
+  border:1px solid color-mix(in srgb,var(--accent) 30%, transparent);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 90% 8%,color-mix(in srgb,var(--accent2) 20%, transparent),transparent 33%),
+    linear-gradient(145deg,var(--bg1),var(--bg2));
+  box-shadow:0 9px 22px rgba(30,78,68,.055);
+  overflow:hidden;cursor:pointer;outline:none;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,opacity .18s ease,filter .18s ease;
+}
+.method-card:before{
+  content:"";position:absolute;left:0;top:12%;bottom:12%;width:3px;border-radius:0 6px 6px 0;
+  background:linear-gradient(var(--accent2),var(--accent));
+}
+.method-card:after{
+  content:"";position:absolute;inset:-65% -25%;width:35%;height:230%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);
+  transform:rotate(18deg) translateX(-260%);transition:transform .65s ease;pointer-events:none;
+}
+.method-card:hover{transform:translateY(-3px) scale(1.015);box-shadow:0 15px 34px color-mix(in srgb,var(--accent) 17%, transparent);border-color:color-mix(in srgb,var(--accent) 58%, transparent)}
+.method-card:hover:after{transform:rotate(18deg) translateX(480%)}
+.method-card.active{
+  transform:translateY(-2px) scale(1.018);
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%, transparent),0 16px 36px color-mix(in srgb,var(--accent) 21%, transparent);
+}
+.method-card.neighbor{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 13%, transparent),0 10px 24px rgba(30,78,68,.07)}
+.method-card.dimmed{opacity:.24;filter:saturate(.55)}
+.method-card:focus-visible{box-shadow:0 0 0 3px rgba(0,169,132,.23)}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:7px}
+.method-card__num{font-size:8px;font-weight:950;letter-spacing:.13em;color:var(--accent)}
+.group-chip{font-size:6.8px;font-weight:950;letter-spacing:.07em;text-transform:uppercase;padding:3px 6px;border-radius:999px;background:color-mix(in srgb,var(--accent) 10%,#fff);color:var(--accent);white-space:nowrap}
+.method-card h3{margin:6px 0 4px;font-size:clamp(13px,1.25vw,18px);line-height:1.02;letter-spacing:-.025em}
+.method-card p{margin:0;padding-right:2px;color:#60756f;font-size:clamp(8px,.72vw,10.5px);line-height:1.28;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.method-card__tag{position:absolute;left:11px;bottom:8px;right:35px;color:var(--accent);font-size:6.8px;font-weight:950;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.method-card__arrow{position:absolute;right:9px;bottom:7px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 12%,#fff);color:var(--accent);font-size:11px;font-weight:950;transition:.18s}
+.method-card:hover .method-card__arrow,.method-card.active .method-card__arrow{transform:rotate(45deg);background:var(--accent);color:#fff}
+
+.analytics{--accent:var(--analytics);--accent2:var(--analytics2);--bg1:#f9fbff;--bg2:#eef4ff}
+.finance{--accent:var(--finance);--accent2:var(--finance2);--bg1:#fffdf8;--bg2:#fff4d9}
+.technical{--accent:var(--technical);--accent2:var(--technical2);--bg1:#f8fdfe;--bg2:#eaf7f9}
+.parameter{--accent:var(--parameter);--accent2:var(--parameter2);--bg1:#f3fffb;--bg2:#e4f9f2;border-width:2px}
+.project{--accent:var(--project);--accent2:var(--project2);--bg1:#fbfefb;--bg2:#edf8ef}
+.control{--accent:var(--control);--accent2:var(--control2);--bg1:#fffafa;--bg2:#fff0ef}
+
+@keyframes breathe{0%,100%{box-shadow:0 0 0 3px rgba(0,169,132,.07),0 12px 26px rgba(0,169,132,.10)}50%{box-shadow:0 0 0 5px rgba(0,169,132,.12),0 17px 36px rgba(0,169,132,.18)}}
+.parameter{animation:breathe 2.8s ease-in-out infinite}
+
+@media(max-height:760px){
+  .app{grid-template-rows:minmax(145px,23vh) minmax(0,1fr)}
+  .topbar{padding-top:8px;padding-bottom:7px}
+  .thesis{font-size:18px} .thesis-sub{font-size:9px}
+  .detail-panel{min-height:112px} .detail-item{min-height:58px;padding:6px 7px}
+  .detail-item span{font-size:8.5px} .cards{gap:7px} .method-card{padding:8px 9px}
+  .method-card h3{margin-top:4px} .method-card__tag{left:9px;bottom:6px} .method-card__arrow{bottom:5px}
+}
+@media(max-width:1050px){
+  html,body{overflow:auto} .app{height:auto;min-height:100dvh;display:block}
+  .topbar{position:sticky;top:0;max-height:none} .topline{grid-template-columns:1fr}
+  .detail-panel{min-height:0} .detail-grid{grid-template-columns:repeat(2,1fr)}
+  .board{padding-top:12px} .cards{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(145px,auto)}
+}
+@media(max-width:680px){
+  .topbar{padding:10px} .detail-grid{grid-template-columns:1fr 1fr} .detail-item:nth-child(n+3){display:none}
+  .cards{grid-template-columns:1fr 1fr;grid-auto-rows:150px} .method-card p{font-size:9px}
+}
+.back-home{position:fixed;right:14px;top:10px;z-index:60;text-decoration:none;color:#17352f;background:rgba(255,255,255,.92);border:1px solid rgba(20,80,67,.16);border-radius:999px;padding:7px 11px;font:900 8px Inter,Segoe UI,Arial,sans-serif;letter-spacing:.08em;box-shadow:0 7px 20px rgba(30,78,68,.08)}.back-home:hover{border-color:rgba(0,169,132,.5);color:#00896c}@media(max-width:1050px){.back-home{position:absolute;top:8px;right:10px}}</style>
+</head>
+<body><a class="back-home" href="./index.html">← ПРОЕКТСЕТЬ</a>
+<div class="app">
+  <header class="topbar">
+    <div class="topline">
+      <div>
+        <div class="brandline"><span class="eyebrow">ПРОЕКТСЕТЬ · МЕТОДОЛОГИЯ</span></div>
+        <h1 class="thesis">Сначала задаём результат, потом проектируем решение.</h1>
+        <p class="thesis-sub">Выберите карточку — подробности остаются в верхней фиксированной панели. Цвет показывает тип задачи.</p>
+        <div class="filters">
+          <button class="filter active" data-filter="all">ВСЕ</button>
+          <button class="filter" data-filter="analytics">АНАЛИТИКА</button>
+          <button class="filter" data-filter="finance">ФИНАНСЫ</button>
+          <button class="filter" data-filter="technical">ТЕХНИЧЕСКОЕ ЗАДАНИЕ</button>
+          <button class="filter" data-filter="parameter">ПАРАМЕТРИЗАЦИЯ</button>
+          <button class="filter" data-filter="project">ПРОЕКТИРОВАНИЕ</button>
+          <button class="filter" data-filter="control">КОНТРОЛЬ</button>
+        </div>
+      </div>
+      <div class="detail-panel" id="detailPanel">
+        <div class="detail-empty">Нажмите на карточку — здесь появится её содержание, входы, проверка и результат.</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="board">
+    <section class="cards" id="cards">
+      <article class="method-card analytics" data-step="profile" data-group="analytics" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">01</span><span class="group-chip">Аналитика</span></div>
+      <h3>Квартирный профиль</h3>
+      <p>Аналитическое задание: структура квартир, диапазоны площадей и целевая средняя площадь на основании рынка и продаж.</p>
+      <div class="method-card__tag">Доли квартир · Sср · ликвидность</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card finance" data-step="finance" data-group="finance" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">02</span><span class="group-chip">Финансы</span></div>
+      <h3>Финансовая цель</h3>
+      <p>Финансовое задание: каким должен быть проект экономически до начала разработки решения.</p>
+      <div class="method-card__tag">ТЭП · себестоимость · KPI</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card technical" data-step="urban" data-group="technical" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">03</span><span class="group-chip">Техническое задание</span></div>
+      <h3>Градостроительные ограничения</h3>
+      <p>Формализуем участок, плотность, высотность, парковки, инсоляцию и пространство допустимых решений.</p>
+      <div class="method-card__tag">ГПЗУ · ПЗЗ · Исходные ограничения</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card technical" data-step="product" data-group="technical" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">04</span><span class="group-chip">Техническое задание</span></div>
+      <h3>Класс и технические требования</h3>
+      <p>Фиксируем продуктовые, нормативные, инженерные и корпоративные требования к будущему решению.</p>
+      <div class="method-card__tag">Класс · АМ · обязательные требования</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card parameter" data-step="parameters" data-group="parameter" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">05</span><span class="group-chip">Параметризация</span></div>
+      <h3>Параметризация</h3>
+      <p>Переводим аналитическое, финансовое и техническое задания в измеримый коридор допустимого проектирования.</p>
+      <div class="method-card__tag">ТЭП · КЭП · Sср · лимиты</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card project" data-step="scenarios" data-group="project" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">06</span><span class="group-chip">Проектирование</span></div>
+      <h3>Сценарии массинга</h3>
+      <p>Формируем несколько вариантов объёма, которые способны выполнить заданные параметры на конкретном участке.</p>
+      <div class="method-card__tag">Поиск вариантов</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card project" data-step="platform" data-group="project" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">07</span><span class="group-chip">Проектирование</span></div>
+      <h3>Выбор планировочной схемы</h3>
+      <p>Выбираем планировочную схему и геометрию корпуса, способные выполнить профиль, ТЭП, КЭП и ограничения себестоимости.</p>
+      <div class="method-card__tag">Т / Н / другое решение</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card project" data-step="floor" data-group="project" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">08</span><span class="group-chip">Проектирование</span></div>
+      <h3>Типовой этаж</h3>
+      <p>Создаём работоспособный геометрический каркас этажа с учётом технических ограничений и требований к планировочной схеме.</p>
+      <div class="method-card__tag">Ядро · МОП · ЛЛУ · геометрия</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card project" data-step="apartmentography" data-group="project" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">09</span><span class="group-chip">Проектирование</span></div>
+      <h3>Квартирография</h3>
+      <p>Переводим квартирный профиль в конкретный набор квартир внутри сформированного типового этажа.</p>
+      <div class="method-card__tag">Профиль → реальные лоты</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card project" data-step="kep" data-group="project" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">10</span><span class="group-chip">Проектирование</span></div>
+      <h3>КЭП</h3>
+      <p>Проверяем архитектурную эффективность и находим системные потери площади.</p>
+      <div class="method-card__tag">Продаваемая площадь / площадь этажа</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card project" data-step="massing1" data-group="project" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">11</span><span class="group-chip">Проектирование</span></div>
+      <h3>Уточнённый массинг</h3>
+      <p>Собираем объект из проверенных планировочных схем и типовых этажей и получаем фактические ТЭП.</p>
+      <div class="method-card__tag">Посадка решения на участок</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card finance" data-step="fincheck" data-group="finance" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">12</span><span class="group-chip">Финансы</span></div>
+      <h3>Финансовый расчёт</h3>
+      <p>Проверяем разработанный вариант по себестоимости, ТЭП и финансовым KPI.</p>
+      <div class="method-card__tag">Цель ↔ фактическое решение</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card analytics" data-step="liquidity" data-group="analytics" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">13</span><span class="group-chip">Аналитика</span></div>
+      <h3>Ликвидность</h3>
+      <p>Проверяем фактический набор квартир на соответствие спросу и требуемому темпу реализации.</p>
+      <div class="method-card__tag">Скорость выбывания лотов</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card control" data-step="workgroup" data-group="control" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">14</span><span class="group-chip">Контроль</span></div>
+      <h3>Экспертная проверка</h3>
+      <p>Продукт, финансы, продажи, проектирование и технические эксперты проверяют вариант до утверждения.</p>
+      <div class="method-card__tag">Межфункциональная проверка</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+<article class="method-card control" data-step="committee" data-group="control" tabindex="0" aria-selected="false">
+      <div class="card-top"><span class="method-card__num">15</span><span class="group-chip">Контроль</span></div>
+      <h3>Выбор решения</h3>
+      <p>Из нескольких проверенных вариантов выбирается и фиксируется одно решение для дальнейшего проектирования.</p>
+      <div class="method-card__tag">Утверждённый вариант</div>
+      <div class="method-card__arrow">↗</div>
+    </article>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const details = {"profile": [["Что задаём", "Доли типов квартир, диапазоны площадей и целевую среднюю площадь."], ["Источник", "Рынок, продажи, стратегия позиционирования, класс продукта."], ["Проверка", "Соответствие спросу и целевой ликвидности."], ["Результат", "Аналитическое задание на будущую квартирографию."]], "finance": [["Что задаём", "Целевые ТЭП, лимит себестоимости и финансовые KPI."], ["Источник", "Финансовая модель, стратегия, продукт, продажи."], ["Зачем", "Чтобы проектировалось экономически допустимое решение."], ["Результат", "Финансовая цель, обязательная для параметризации."]], "urban": [["Вход", "ГПЗУ, ПЗЗ, ограничения участка, парковки, инсоляция."], ["Фиксируем", "Пятно, плотность, этажность, инсоляционный объём."], ["Проверка", "Все ограничения должны быть формализованы."], ["Результат", "Исходные ограничения — пространство допустимых решений."]], "product": [["Продукт", "Класс объекта и атрибутивная модель."], ["ТЗ", "Нормативные, конструктивные, инженерные и корпоративные ограничения."], ["Принцип", "Оптимизация не должна разрушать обязательные требования."], ["Результат", "Комплект требований для последующей параметризации."]], "parameters": [["На входе", "Квартирный профиль + финансовая цель + Исходные ограничения + ТЗ."], ["Что параметризуем", "ТЭП, КЭП, Sср, площади, этажность, глубину, себестоимость."], ["Смысл", "Бизнес-задача переводится в измеримые ограничения проектирования."], ["Результат", "Числовой коридор допустимого проектного решения."]], "scenarios": [["Задача", "Найти несколько принципиально разных способов выполнить цель."], ["Ограничения", "ТЭП, Sср, класс, профиль, финансовая цель, Исходные ограничения."], ["Проверка", "Сценарии должны проходить по участку и целевым параметрам."], ["Результат", "Допустимые сценарии для дальнейшей разработки."]], "platform": [["Выбор", "Базовая планировочная схема и геометрия корпуса."], ["Критерии", "Профиль, Sср, ТЭП, КЭП, глубина, себестоимость."], ["Принцип", "Планировочная схема — средство достижения параметров, а не самоцель."], ["Результат", "Выбранная планировочная схема для разработки типового этажа."]], "floor": [["Сначала", "Формируем технически работоспособную геометрию."], ["Состав", "Контур, ядро, МОП/ЛЛУ, конструктив и инженерные зоны."], ["Ограничения", "Параметризация, планировочная схема, нормы и техническое задание."], ["Результат", "Каркас этажа, внутри которого собирается квартирография."]], "apartmentography": [["Что происходит", "Целевой профиль превращается в конкретные квартиры."], ["Проверяем", "Доли, площади, Sср, количество квартир, класс продукта."], ["Важно", "Решение должно проходить аналитическое и финансовое задания."], ["Результат", "Фактическая квартирография типового этажа."]], "kep": [["Что показывает", "Долю площади здания, превращающуюся в продаваемую."], ["Когда", "После формирования типового этажа и квартирографии."], ["Ищем", "Потери в ядре, МОП/ЛЛУ и геометрии корпуса."], ["Результат", "КЭП и резерв архитектурной эффективности."]], "massing1": [["На входе", "Платформа, типовой этаж, квартирография, сценарии."], ["Что делаем", "Размещаем проверенное решение на участке."], ["Получаем", "Корпуса, этажность, фактические ТЭП и квартирографию."], ["Результат", "Уточнённый массинг для финансовой и продуктовой проверки."]], "fincheck": [["Разница", "Финансовое задание задаёт цель, расчёт проверяет факт."], ["Проверяем", "ТЭП, себестоимость, выручку, NPV, IRR, DSCR, маржу."], ["Если не проходит", "Возврат к параметризации / массингу / планировочной схеме."], ["Результат", "Подтверждение соответствия решения финансовой цели."]], "liquidity": [["Определение", "Скорость выбывания лотов с продуктовой полки."], ["Проверяем", "Структуру лотов, площади, цену входа и возможные перекосы."], ["Связь", "Профиль задаёт гипотезу, квартирография показывает фактический продукт."], ["Результат", "Подтверждение продуктовой состоятельности набора лотов."]], "workgroup": [["Участники", "Технические эксперты, продукт, продажи, финансы, проектирование."], ["Проверка", "Рыночная, продуктовая, техническая и финансовая состоятельность."], ["Критерий", "Нет критических замечаний."], ["Результат", "Вариант готов к финальному выбору."]], "committee": [["На входе", "Несколько проверенных и сопоставимых вариантов."], ["Решение", "Выбор одного решения по совокупности критериев."], ["Фиксация", "Ключевые параметры закрепляются для дальнейшего проектирования."], ["Результат", "Утверждённый вариант."]]};
+  const cards = [...document.querySelectorAll('.method-card')];
+  const detail = document.getElementById('detailPanel');
+  const filters = [...document.querySelectorAll('.filter')];
+  const order = cards.map(c => c.dataset.step);
+
+  function renderDetail(card) {
+    const item = details[card.dataset.step];
+    if (!item) return;
+    cards.forEach(c => c.classList.remove('active','neighbor'));
+    card.classList.add('active');
+    card.setAttribute('aria-selected','true');
+    cards.filter(c => c !== card).forEach(c => c.setAttribute('aria-selected','false'));
+
+    const idx = order.indexOf(card.dataset.step);
+    if (idx > 0) cards.find(c => c.dataset.step === order[idx-1])?.classList.add('neighbor');
+    if (idx < order.length-1) cards.find(c => c.dataset.step === order[idx+1])?.classList.add('neighbor');
+
+    const category = card.querySelector('.group-chip')?.textContent || '';
+    const title = card.querySelector('h3')?.textContent || '';
+    detail.innerHTML = `
+      <div class="detail-title-row">
+        <div class="detail-title">${card.querySelector('.method-card__num').textContent} · ${title}</div>
+        <div class="detail-category">${category}</div>
+      </div>
+      <div class="detail-grid">
+        ${item.map(([t,x]) => `<div class="detail-item"><b>${t}</b><span>${x}</span></div>`).join('')}
+      </div>`;
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => renderDetail(card));
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        renderDetail(card);
+      }
+    });
+  });
+
+  filters.forEach(btn => btn.addEventListener('click', () => {
+    filters.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    cards.forEach(card => {
+      const match = f === 'all' || card.dataset.group === f;
+      card.classList.toggle('dimmed', !match);
+    });
+  }));
+
+  // initial focus on the central methodological step
+  renderDetail(document.querySelector('[data-step="parameters"]'));
+})();
+</script>
+</body>
+</html>
