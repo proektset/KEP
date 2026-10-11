@@ -58,13 +58,125 @@
 .methodologyOrb span{font-size:8px!important;letter-spacing:.055em!important;line-height:1.18!important}
 @media(max-width:850px){.methodologyOrb{width:90px!important}.methodologyOrb span{font-size:6.8px!important}}
 </style><style id="audit-hover-swap-fix">
-.auditCircle .auditHover{display:none!important;visibility:hidden!important;opacity:0!important}
-.auditCircle .auditHeroBase{opacity:1!important;visibility:visible!important;transform:none!important;z-index:3!important}
+/* FINAL: один слой контента, без всплывающей карточки */
+.auditCircle{
+  overflow:visible!important;
+  background:radial-gradient(circle at 50% 36%,#f5fffc 0%,#e8f9f4 54%,#daf3ec 100%)!important;
+}
+.auditCircle .auditHover{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+.auditCircle .auditHeroBase,
+.auditCircle:hover .auditHeroBase,
 .auditCircle.showAuditInfo .auditHeroBase,
-.auditHero:hover .auditHeroBase{opacity:1!important;visibility:visible!important;transform:none!important}
-.auditCircle .auditLabel,.auditCircle .auditText{transition:opacity .16s ease,transform .16s ease}
-.auditCircle.auditTextChanging .auditLabel,.auditCircle.auditTextChanging .auditText{opacity:.15;transform:translateY(2px)}
-.auditCircle .auditFreeBtn{position:relative!important;z-index:12!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+.auditHero:hover .auditHeroBase,
+.auditHero:hover>.auditHeroBase{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:9% 11% 24%!important;
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+  filter:none!important;
+  z-index:4!important;
+}
+.auditCircle .auditBadge{
+  flex:0 0 auto!important;
+  margin:0 0 13px!important;
+  padding:6px 10px!important;
+  color:#16846e!important;
+  background:rgba(0,169,132,.08)!important;
+  border:1px solid rgba(0,169,132,.18)!important;
+  font-size:9px!important;
+  line-height:1!important;
+}
+.auditCircle .auditLabel{
+  width:100%!important;
+  max-width:78%!important;
+  margin:0 auto 12px!important;
+  color:#1f5e50!important;
+  font-size:clamp(24px,2.45vw,38px)!important;
+  line-height:1.02!important;
+  letter-spacing:.035em!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  text-wrap:balance;
+  opacity:1!important;
+  transform:none!important;
+}
+.auditCircle.is-info .auditLabel{
+  max-width:72%!important;
+  color:#146d59!important;
+  font-size:clamp(22px,2.1vw,34px)!important;
+  line-height:1.00!important;
+  letter-spacing:.015em!important;
+}
+.auditCircle .auditText{
+  width:100%!important;
+  max-width:72%!important;
+  min-height:58px!important;
+  margin:0 auto!important;
+  color:#55736b!important;
+  font-size:clamp(10px,.82vw,13px)!important;
+  line-height:1.38!important;
+  text-align:center!important;
+  opacity:1!important;
+  transform:none!important;
+}
+.auditCircle.is-info .auditText{
+  max-width:70%!important;
+  color:#496a61!important;
+}
+.auditCircle .auditFreeBtn{
+  position:absolute!important;
+  left:50%!important;
+  bottom:11%!important;
+  transform:translateX(-50%)!important;
+  z-index:20!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:auto!important;
+  min-width:230px!important;
+  height:46px!important;
+  margin:0!important;
+  padding:0 22px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:#d51f26!important;
+  color:#fff!important;
+  font-size:12px!important;
+  font-weight:950!important;
+  letter-spacing:.035em!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  box-shadow:0 8px 24px rgba(186,20,28,.28)!important;
+  animation:auditPulse 1.65s infinite!important;
+}
+.auditCircle .auditFreeBtn:hover{
+  background:#bd161d!important;
+  transform:translateX(-50%) translateY(-2px)!important;
+}
+@media(max-width:850px){
+  .auditCircle .auditHeroBase{padding:9% 10% 25%!important}
+  .auditCircle .auditLabel{max-width:80%!important;font-size:clamp(22px,7vw,32px)!important}
+  .auditCircle.is-info .auditLabel{max-width:76%!important;font-size:clamp(20px,6.2vw,29px)!important}
+  .auditCircle .auditText,.auditCircle.is-info .auditText{max-width:74%!important;font-size:10px!important}
+  .auditCircle .auditFreeBtn{min-width:210px!important;height:44px!important;bottom:10%!important}
+}
 </style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brandBlock"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><a class="tgSubscribe" href="https://t.me/proektset" target="_blank" rel="noopener"><span>TELEGRAM · КАНАЛ ДЛЯ ИНФОРМИРОВАНИЯ</span><b>Подписаться →</b></a></div><div class="headerVisits" title="Количество открытий сайта">СЕТЬ ОНЛАЙН · <b id="siteVisits">—</b> посещений</div><button class="contactBtn" id="openContacts">КОНТАКТЫ</button><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
 <a class="node" href="./tools.html"><div class="k">РАЗДЕЛ</div><b>Инструменты</b><small>Расчётные и аналитические инструменты для проверки и повышения эффективности проекта.</small></a>
 <a class="node" href="./research.html"><div class="k">ИССЛЕДОВАНИЯ</div><b>База исследований</b><small>Проверенные научные работы, данные и практические выводы для проектировщика.</small></a>\n
@@ -121,14 +233,11 @@ if(auditCircle){
   const defaultAuditLabel=auditLabel?auditLabel.textContent:'АУДИТ ПРОЕКТА';
   const defaultAuditText=auditText?auditText.textContent:'';
   const setAuditCopy=(info)=>{
-    auditCircle.classList.add('auditTextChanging');
-    setTimeout(()=>{
-      if(auditLabel)auditLabel.textContent=info?'ЭФФЕКТИВНОСТЬ — В ДЕНЬГАХ':defaultAuditLabel;
-      if(auditText)auditText.textContent=info
-        ?'КЭП показывает, какая доля площади здания становится продаваемой. Находим потерянные м² и оцениваем экономический эффект.'
-        :defaultAuditText;
-      auditCircle.classList.remove('auditTextChanging');
-    },90);
+    auditCircle.classList.toggle('is-info',info);
+    if(auditLabel)auditLabel.textContent=info?'ЭФФЕКТИВНОСТЬ — В ДЕНЬГАХ':defaultAuditLabel;
+    if(auditText)auditText.textContent=info
+      ?'КЭП показывает, какая доля площади здания становится продаваемой. Находим потерянные м² и оцениваем экономический эффект.'
+      :defaultAuditText;
   };
   auditCircle.onmouseenter=()=>setAuditCopy(true);
   auditCircle.onmouseleave=()=>setAuditCopy(false);
