@@ -51,21 +51,6 @@ jobs:
               kep.setAttribute('href','./calculator.html?video=1');
             }
 
-            const circle=document.querySelector('.auditCircle');
-            if(circle){
-              circle.setAttribute('role','link');
-              circle.setAttribute('tabindex','0');
-              circle.setAttribute('aria-label','Открыть калькулятор КЭП');
-              const go=()=>{ window.location.href='./calculator.html'; };
-              circle.addEventListener('click',e=>{
-                if(e.target.closest('#openProjectSend')) return;
-                go();
-              });
-              circle.addEventListener('keydown',e=>{
-                if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}
-              });
-            }
-
             const head=document.querySelector('.head');
             if(head && !document.querySelector('.mobileViewBtn')){
               const b=document.createElement('button');
