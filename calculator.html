@@ -247,4 +247,20 @@ $('saveBtn').onclick=async()=>{if(!last||!sb||!user)return stat('База пок
 init();
 </script>
 <script type="module" src="./meta_core_v8.js"></script>
-</body></html>
+<script id="direct-open-video">
+(()=>{
+  if(new URLSearchParams(window.location.search).get('video')!=='1')return;
+  const openVideo=()=>{
+    const modal=document.getElementById('videoModal');
+    if(!modal)return;
+    modal.classList.add('open');
+    const video=modal.querySelector('video');
+    if(video){try{video.currentTime=0}catch(e){}}
+  };
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(openVideo,0),{once:true});
+  }else{
+    setTimeout(openVideo,0);
+  }
+})();
+</script></body></html>
