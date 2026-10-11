@@ -53,6 +53,18 @@
 .kepExplainHot:after{opacity:1!important;content:'СМОТРЕТЬ ВИДЕО  →'!important;color:#008d6c!important}
 .page .auditCircle{pointer-events:auto!important;cursor:pointer!important}
 .auditCircle:focus{outline:3px solid rgba(0,220,160,.35);outline-offset:8px}
+</style><style id="methodology-name-fix">
+.methodologyOrb{width:118px!important}
+.methodologyOrb span{font-size:8px!important;letter-spacing:.055em!important;line-height:1.18!important}
+@media(max-width:850px){.methodologyOrb{width:90px!important}.methodologyOrb span{font-size:6.8px!important}}
+</style><style id="audit-hover-swap-fix">
+.auditCircle .auditHover{display:none!important;visibility:hidden!important;opacity:0!important}
+.auditCircle .auditHeroBase{opacity:1!important;visibility:visible!important;transform:none!important;z-index:3!important}
+.auditCircle.showAuditInfo .auditHeroBase,
+.auditHero:hover .auditHeroBase{opacity:1!important;visibility:visible!important;transform:none!important}
+.auditCircle .auditLabel,.auditCircle .auditText{transition:opacity .16s ease,transform .16s ease}
+.auditCircle.auditTextChanging .auditLabel,.auditCircle.auditTextChanging .auditText{opacity:.15;transform:translateY(2px)}
+.auditCircle .auditFreeBtn{position:relative!important;z-index:12!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
 </style></head><body><canvas id="net"></canvas><div class="page"><header class="head"><div class="brandBlock"><div class="brand">ПРОЕКТ<span>СЕТЬ</span></div><a class="tgSubscribe" href="https://t.me/proektset" target="_blank" rel="noopener"><span>TELEGRAM · КАНАЛ ДЛЯ ИНФОРМИРОВАНИЯ</span><b>Подписаться →</b></a></div><div class="headerVisits" title="Количество открытий сайта">СЕТЬ ОНЛАЙН · <b id="siteVisits">—</b> посещений</div><button class="contactBtn" id="openContacts">КОНТАКТЫ</button><div class="sub"><strong>ПРОФЕССИОНАЛЬНАЯ СРЕДА</strong><br><span>ЗНАНИЯ · ИНСТРУМЕНТЫ · ИССЛЕДОВАНИЯ · ПРАКТИКА</span></div></header><main class="stage"><section class="side left">
 <a class="node" href="./tools.html"><div class="k">РАЗДЕЛ</div><b>Инструменты</b><small>Расчётные и аналитические инструменты для проверки и повышения эффективности проекта.</small></a>
 <a class="node" href="./research.html"><div class="k">ИССЛЕДОВАНИЯ</div><b>База исследований</b><small>Проверенные научные работы, данные и практические выводы для проектировщика.</small></a>\n
@@ -104,8 +116,22 @@ if(auditCircle){
     panel.style.display='block';
     try{history.replaceState(null,'','?section=audit')}catch(e){}
   };
-  auditCircle.onmouseenter=()=>auditCircle.classList.add('showAuditInfo');
-  auditCircle.onmouseleave=()=>auditCircle.classList.remove('showAuditInfo');
+  const auditLabel=auditCircle.querySelector('.auditLabel');
+  const auditText=auditCircle.querySelector('.auditText');
+  const defaultAuditLabel=auditLabel?auditLabel.textContent:'АУДИТ ПРОЕКТА';
+  const defaultAuditText=auditText?auditText.textContent:'';
+  const setAuditCopy=(info)=>{
+    auditCircle.classList.add('auditTextChanging');
+    setTimeout(()=>{
+      if(auditLabel)auditLabel.textContent=info?'ЭФФЕКТИВНОСТЬ — В ДЕНЬГАХ':defaultAuditLabel;
+      if(auditText)auditText.textContent=info
+        ?'КЭП показывает, какая доля площади здания становится продаваемой. Находим потерянные м² и оцениваем экономический эффект.'
+        :defaultAuditText;
+      auditCircle.classList.remove('auditTextChanging');
+    },90);
+  };
+  auditCircle.onmouseenter=()=>setAuditCopy(true);
+  auditCircle.onmouseleave=()=>setAuditCopy(false);
   auditCircle.addEventListener('click',e=>{
     if(e.target.closest('#openProjectSend'))return;
     e.preventDefault();
@@ -121,7 +147,7 @@ if(auditCircle){
     }
   });
 }
-if(projectSendBtn){projectSendBtn.addEventListener('mouseenter',e=>{e.stopPropagation();auditCircle&&auditCircle.classList.remove('showAuditInfo')});}
+if(projectSendBtn){projectSendBtn.addEventListener('mouseenter',e=>e.stopPropagation());}
 const projectSendModal=document.getElementById('projectSendModal');document.getElementById('openProjectSend').onclick=async()=>{projectSendModal.classList.add('open');try{await navigator.clipboard.writeText('proektset@mail.ru');const n=document.getElementById('copyNotice');if(n)n.textContent='Адрес почты скопирован'}catch(e){}};const copyProjectMail=document.getElementById('copyProjectMail');if(copyProjectMail)copyProjectMail.onclick=async e=>{e.preventDefault();try{await navigator.clipboard.writeText('proektset@mail.ru');document.getElementById('copyNotice').textContent='Адрес почты скопирован'}catch(err){document.getElementById('copyNotice').textContent='proektset@mail.ru'}};
 document.getElementById('projectSendClose').onclick=()=>projectSendModal.classList.remove('open');projectSendModal.addEventListener('click',e=>{if(e.target===projectSendModal)projectSendModal.classList.remove('open')});
 const contactModal=document.getElementById('contactModal'),contactForm=document.getElementById('contactForm'),contactStatus=document.getElementById('contactStatus');
@@ -211,4 +237,4 @@ async function updateVisitCounter(){
 }
 updateVisitCounter();
 </script><!-- build: homepage-clean-20260928-01 -->
-<a class="methodologyOrb" href="./methodology.html" aria-label="Открыть раздел Методология"><span>МЕТОДОЛОГИЯ</span><b>→</b></a></body></html>
+<a class="methodologyOrb" href="./methodology.html" aria-label="Открыть раздел Методология"><span>МЕТОДОЛОГИЯ<br>ПРОЕКТИРОВАНИЯ</span><b>→</b></a></body></html>
