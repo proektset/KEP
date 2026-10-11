@@ -34,8 +34,8 @@ jobs:
 
           css = '''<style id="current-ui-fixes">
           .mobileViewBtn{border:1px solid rgba(0,169,132,.38);background:#fff;color:#008f70;border-radius:999px;padding:8px 13px;font:900 10px Inter,Segoe UI,Arial,sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 0 18px rgba(0,210,155,.13)}
-          .kepExplainHot{border:2px solid #f0b400!important;background:linear-gradient(135deg,#fff7bf,#fff)!important;box-shadow:0 0 0 3px rgba(255,204,0,.14),0 0 30px rgba(255,190,0,.34)!important;transform:scale(1.035)}
-          .kepExplainHot b{color:#9a6900!important;font-size:19px!important}.kepExplainHot:after{opacity:1!important;content:'СМОТРЕТЬ ВИДЕО  →'!important;color:#b77700!important}
+          .kepExplainHot{border:2px solid #00b98d!important;background:linear-gradient(135deg,#e9fff8,#fff)!important;box-shadow:0 0 0 3px rgba(0,185,141,.10),0 0 30px rgba(0,205,155,.34)!important;transform:scale(1.035)}
+          .kepExplainHot b{color:#008d6c!important;font-size:19px!important}.kepExplainHot:after{opacity:1!important;content:'СМОТРЕТЬ ВИДЕО  →'!important;color:#008d6c!important}
           .page .auditCircle{pointer-events:auto!important;cursor:pointer!important}
           .auditCircle:focus{outline:3px solid rgba(0,220,160,.35);outline-offset:8px}
           body.forceMobile{overflow:auto!important}body.forceMobile .page{height:auto!important;min-height:100vh;padding:16px!important}body.forceMobile .stage{grid-template-columns:1fr!important;padding:28px 0 58px!important;gap:18px!important}body.forceMobile .left,body.forceMobile .right{justify-items:stretch!important}body.forceMobile .center{order:-1!important}body.forceMobile .auditCircle{width:min(380px,78vw)!important;margin:26px auto!important}body.forceMobile .node{width:100%!important}body.forceMobile .head{gap:12px;align-items:flex-start;flex-wrap:wrap!important}
