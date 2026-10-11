@@ -234,10 +234,14 @@ if(auditCircle){
   const defaultAuditText=auditText?auditText.textContent:'';
   const setAuditCopy=(info)=>{
     auditCircle.classList.toggle('is-info',info);
-    if(auditLabel)auditLabel.textContent=info?'ЭФФЕКТИВНОСТЬ — В ДЕНЬГАХ':defaultAuditLabel;
-    if(auditText)auditText.textContent=info
-      ?'КЭП показывает, какая доля площади здания становится продаваемой. Находим потерянные м² и оцениваем экономический эффект.'
-      :defaultAuditText;
+    if(auditLabel){
+      auditLabel.innerHTML=info?'ЭФФЕКТИВНОСТЬ<br>В ДЕНЬГАХ':defaultAuditLabel;
+    }
+    if(auditText){
+      auditText.innerHTML=info
+        ?'КЭП показывает, какая доля площади здания становится<br>продаваемой. Находим потерянные м² и оцениваем<br>экономический эффект.'
+        :defaultAuditText;
+    }
   };
   auditCircle.onmouseenter=()=>setAuditCopy(true);
   auditCircle.onmouseleave=()=>setAuditCopy(false);
@@ -471,5 +475,35 @@ body .auditCircle.auditHero .auditFreeBtn:hover{
   body .auditCircle.auditHero .auditText,
   body .auditCircle.auditHero.is-info .auditText{max-width:72%!important;font-size:10px!important}
   body .auditCircle.auditHero .auditFreeBtn{width:76%!important;min-width:230px!important;max-width:290px!important;height:46px!important}
+}
+
+body .auditCircle.auditHero .auditLabel{
+  max-width:82%!important;
+  margin:0 auto 14px!important;
+  font-size:clamp(23px,2.15vw,34px)!important;
+  line-height:1.06!important;
+  letter-spacing:.01em!important;
+  word-break:keep-all!important;
+  overflow-wrap:normal!important;
+  text-wrap:balance!important;
+}
+body .auditCircle.auditHero.is-info .auditLabel{
+  max-width:82%!important;
+  font-size:clamp(22px,2vw,32px)!important;
+  line-height:1.05!important;
+  letter-spacing:.005em!important;
+}
+body .auditCircle.auditHero .auditText,
+body .auditCircle.auditHero.is-info .auditText{
+  max-width:78%!important;
+  min-height:72px!important;
+  font-size:clamp(11px,.9vw,14px)!important;
+  line-height:1.48!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  text-wrap:pretty!important;
+}
+body .auditCircle.auditHero .auditBadge{
+  margin:0 0 16px!important;
 }
 </style></body></html>
