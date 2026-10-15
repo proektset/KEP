@@ -108,7 +108,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--muted)}
     </div>
     <aside class="hero-right" aria-label="Статистика каталога">
       <div class="summary-grid">
-        <div><div class="sum-num" id="sitesCount">17</div><div class="sum-name">инструментов</div></div>
+        <div><div class="sum-num" id="sitesCount">18</div><div class="sum-name">инструментов</div></div>
         <div><div class="sum-num">03</div><div class="sum-name">направления</div></div>
         <div><div class="sum-num">04</div><div class="sum-name">репозитория</div></div>
       </div>
@@ -127,9 +127,10 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--muted)}
       <input id="search" class="search" type="search" aria-label="Поиск по названию или описанию" placeholder="Поиск по каталогу...">
     </label>
   </div>
-  <div class="bar"><span class="results" id="results">17 из 17</span></div>
+  <div class="bar"><span class="results" id="results">18 из 18</span></div>
   <nav class="quick" aria-label="Быстрый доступ">
     <span class="quick-label">Быстрый доступ</span>
+    <a href="https://proektset.github.io/META/%D0%93%D0%BE%D0%B4%D0%BE%D0%B2%D0%BE%D0%B9%20%D0%BE%D1%82%D1%87%D0%B5%D1%82/" target="_blank" rel="noopener">Годовой отчёт ↗</a>
     <a href="https://proektset.github.io/META/система/" target="_blank" rel="noopener">МЕТА Система ↗</a>
     <a href="https://proektset.github.io/META/metasebes/" target="_blank" rel="noopener">МЕТАСЕБЕС ↗</a>
     <a href="https://proektset.github.io/META/схема-системы/" target="_blank" rel="noopener">Схема системы ↗</a>
@@ -162,6 +163,7 @@ const ROOT = 'https://proektset.github.io';
 const sections = [
  {id:'meta',number:'01',title:'МЕТА',description:'Управление системой, процессами и организационной структурой',
   items:[
+   {title:'Годовой отчёт Платформы 2026',url:'/META/Годовой%20отчет/',type:'Итоги 2026',icon:'◈',desc:'Интерактивное табло результатов Платформы: архитектурная и экономическая эффективность, финансовые показатели, прирост площадей и матрица оптимизаций.'},
    {title:'МЕТА Система',url:'/META/система/',type:'Основная система',icon:'М',desc:'Единая рабочая модель: цели, функции, задачи, роли, процессы и управленческие связи.'},
    {title:'Схема системы',url:'/META/схема-системы/',type:'Интерактивная модель',icon:'◇',desc:'Визуальная схема производственной системы: взаимосвязи элементов и демонстрационный режим.'},
    {title:'МЕТА Процессы',url:'/META/processes/',type:'Процессная модель',icon:'↗',desc:'Сквозной поток, процессы, подпроцессы и их структура.'},
