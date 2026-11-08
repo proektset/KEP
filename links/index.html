@@ -74,6 +74,7 @@ h1 em{font-style:normal;color:var(--proj)}
 .open{white-space:nowrap;text-decoration:none;font-size:12px;color:var(--accent);font-weight:900}
 .copy{flex:0 0 auto;background:var(--soft);border:1px solid var(--line);border-radius:9px;color:var(--muted);padding:8px 10px;font-size:11px;font-weight:850}
 .copy:hover{border-color:var(--accent);color:var(--ink)}
+.not-live{white-space:nowrap;font-size:11px;color:var(--muted);font-weight:850}.card[data-unpublished='true']{border-style:dashed;box-shadow:none}
 .empty{padding:60px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px;display:none}
 .archive{border:1px solid var(--line);border-radius:18px;margin:40px 0 60px;padding:6px 22px;background:var(--paper)}
 .archive summary{font-weight:850;cursor:pointer;padding:19px 0}
@@ -108,11 +109,11 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--muted)}
     </div>
     <aside class="hero-right" aria-label="Статистика каталога">
       <div class="summary-grid">
-        <div><div class="sum-num" id="sitesCount">19</div><div class="sum-name">инструментов</div></div>
+        <div><div class="sum-num" id="sitesCount">20</div><div class="sum-name">инструментов</div></div>
         <div><div class="sum-num">03</div><div class="sum-name">направления</div></div>
         <div><div class="sum-num">04</div><div class="sum-name">репозитория</div></div>
       </div>
-      <div class="sum-caption">Каталог опубликованных страниц GitHub Pages. Рабочие ссылки открываются непосредственно на сайтах.</div>
+      <div class="sum-caption">19 опубликованных страниц и 1 прототип, ожидающий публикации. Рабочие ссылки открываются непосредственно на сайтах.</div>
     </aside>
   </section>
   <div class="controls" aria-label="Управление каталогом">
@@ -127,7 +128,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--muted)}
       <input id="search" class="search" type="search" aria-label="Поиск по названию или описанию" placeholder="Поиск по каталогу...">
     </label>
   </div>
-  <div class="bar"><span class="results" id="results">19 из 19</span></div>
+  <div class="bar"><span class="results" id="results">20 из 20</span></div>
   <nav class="quick" aria-label="Быстрый доступ">
     <span class="quick-label">Быстрый доступ</span>
     <a href="https://proektset.github.io/META/%D0%93%D0%BE%D0%B4%D0%BE%D0%B2%D0%BE%D0%B9%20%D0%BE%D1%82%D1%87%D0%B5%D1%82/" target="_blank" rel="noopener">Годовой отчёт ↗</a>
@@ -168,6 +169,7 @@ const sections = [
    {title:'МЕТА Система',url:'/META/система/',type:'Основная система',icon:'М',desc:'Единая рабочая модель: цели, функции, задачи, роли, процессы и управленческие связи.'},
    {title:'Схема системы',url:'/META/схема-системы/',type:'Интерактивная модель',icon:'◇',desc:'Визуальная схема производственной системы: взаимосвязи элементов и демонстрационный режим.'},
    {title:'МЕТА Процессы',url:'/META/processes/',type:'Процессная модель',icon:'↗',desc:'Сквозной поток, процессы, подпроцессы и их структура.'},
+   {title:'МЕТАПОТОК v0.9',url:null,type:'Прототип · не опубликован',icon:'⇄',desc:'Управление проектным потоком: слоты стадий К/ЭП/П/Р/АН, график, статусы, ресурсы и узкие места. Последний найденный HTML — версия 0.9 от 20.10.2026; отдельного сайта пока нет.'},
    {title:'Дирекция / ОФС',url:'/META/directorate/',type:'Организационная система',icon:'▦',desc:'Модель дирекции, связанная с задачами, ролями и управлением производственной мощностью.'},
    {title:'МЕТА Структура',url:'/META/structure.html',type:'Организационная модель',icon:'≡',desc:'Структура как механизм реализации цели, функции и распределение ответственности.'},
    {title:'МЕТАСЕБЕС — Калькулятор',url:'/META/metasebes/',type:'Себестоимость · v46',icon:'₽',desc:'Расчётная модель МЕТАСЕБЕС и МЕТАЭТАЖ: себестоимость, объёмы, сравнение проектных решений.'},
@@ -214,15 +216,20 @@ function render(){
     section.append(heading);
     const cards=el('div','cards');
     for(const item of items){
-      const full=ROOT+item.url;
+      const full=item.url ? ROOT+item.url : null;
       const card=el('article','card');card.dataset.group=group.id;
       const head=el('div','card-top');
       head.append(el('span','card-icon',item.icon),el('span','card-type',item.type));
       card.append(head,el('h3','',item.title),el('p','',item.desc));
       const foot=el('div','card-foot');
-      foot.append(el('span','card-url',full.replace('https://','')));
-      const copy=el('button','copy','Копировать');copy.type='button';copy.setAttribute('aria-label','Скопировать ссылку '+item.title);copy.addEventListener('click',()=>copyLink(full));foot.append(copy);
-      const open=el('a','open','Открыть ↗');open.href=full;open.target='_blank';open.rel='noopener noreferrer';open.setAttribute('aria-label','Открыть '+item.title+' в новой вкладке');foot.append(open);
+      foot.append(el('span','card-url',full ? full.replace('https://','') : 'Публикация ещё не выполнена'));
+      if(full){
+        const copy=el('button','copy','Копировать');copy.type='button';copy.setAttribute('aria-label','Скопировать ссылку '+item.title);copy.addEventListener('click',()=>copyLink(full));foot.append(copy);
+        const open=el('a','open','Открыть ↗');open.href=full;open.target='_blank';open.rel='noopener noreferrer';open.setAttribute('aria-label','Открыть '+item.title+' в новой вкладке');foot.append(open);
+      }else{
+        card.dataset.unpublished='true';
+        foot.append(el('span','not-live','Нет публичного адреса'));
+      }
       card.append(foot);cards.append(card);
     }
     section.append(cards);root.append(section);
